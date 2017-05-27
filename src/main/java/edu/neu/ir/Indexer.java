@@ -105,7 +105,7 @@ public class Indexer {
 
             HttpEntity entity = new NStringEntity(obj.toJSONString(), ContentType.APPLICATION_JSON);
 
-            Response response = restClient.performRequest("PUT","ap_dataset/document/"+map.getKey(), Collections.<String, String>emptyMap(), entity);
+            Response response = restClient.performRequest("PUT","ap89_dataset/document/"+map.getKey(), Collections.<String, String>emptyMap(), entity);
             //System.out.println(EntityUtils.toString(response.getEntity()));
         }
 

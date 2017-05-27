@@ -5,8 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import edu.neu.utility.TermData;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -30,10 +34,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.json.Json;
+import javax.json.JsonObject;
 import java.io.*;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,11 +52,15 @@ public class okapiTF {
     private final static String SCHEME = "http";
     private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
     private static long DOCCount = 0;
-    private static long DOCLength = 41030489;
+    private final static String STOPLIST_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/stoplist.txt";
+    private final static String OUTPUT = "okapiTF.txt";
+
 
     public static void main(String args[]) throws IOException, ParseException {
 
         File queryFile = new File(QUERY_FILE);
+        File stopListFile = new File(STOPLIST_FILE);
+        File okapiTFOutput = new File(OUTPUT);
 
         RestClient restClient = RestClient.builder(
                 new HttpHost(HOST, PORT, SCHEME),
@@ -62,98 +71,180 @@ public class okapiTF {
         DOCCount = Long.parseLong(countJson.get("count").toString());
         System.out.println(DOCCount);
 
-        Settings settings = Settings.builder()
-                .put("cluster.name","elasticsearch").build();
+        double docAverage = (double) 20976545/84612;
+        BufferedWriter writer = new BufferedWriter(new FileWriter(okapiTFOutput));
 
-        TransportClient client = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"),9300));
+        BufferedReader stopListFileBufferedReader = new BufferedReader(new FileReader(stopListFile));
 
-        /*Response searchResponse = restClient.performRequest("GET", "/ap_dataset/document/_search");
-        //ObjectNode searchJson = parseStringToJson(EntityUtils.toString(searchResponse.getEntity()));
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(EntityUtils.toString(searchResponse.getEntity()));
-        JsonNode hits = root.path("hits").path("hits");
-        System.out.println(hits.size());
+        // Read and store StopList terms
+        Set<String> stopWords = new HashSet<String>();
 
-        long count = 0;
-        if (hits.isArray()) {
-            for (final JsonNode hit : hits) {
-                count = count + hit.path("_source").path("text").asText().trim().split(" ").length;
-
-            }
+        String stopListTerm = null;
+        while ((stopListTerm = stopListFileBufferedReader.readLine()) != null) {
+            stopWords.add(stopListTerm.trim());
         }
+        System.out.println(stopWords.size());
 
-        System.out.println(count);*/
-
-        double docAverage = (double) DOCLength/DOCCount;
-        PrintWriter writer = new PrintWriter("okapi_TF.txt", "UTF-8");
         BufferedReader br = new BufferedReader(new FileReader(queryFile));
-
         String query = null;
-        while ((query = br.readLine()) != null){
+        while ((query = br.readLine()) != null) {
 
             //for each query
-            if (query.length() <= 3)
-            {break;}
+            if (query.length() <= 3) {
+                break;
+            }
 
             HashMap<String, Float> okapiTFMAP = new HashMap<String, Float>();
+            HashMap<String, Float> SortedMap = new HashMap<String, Float>();
+
             String queryNo = query.substring(0, 3).replace(".", "").trim();
-            //System.out.println(queryNo);
 
-            double OkapiTFD = 0.0;
+            System.out.println("QUERY NO : "+queryNo);
 
-            // for each word in query
-            for (int i = 0+5; i <= query.length() - 1; i++){
+            query = query.substring(5).trim();
 
-                if (query.substring(i).startsWith(" ") || i == 0){
+            StringBuffer cleanQuery = new StringBuffer();
+            int index = 0;
 
-                    for (int j = i + 1 ; j <= query.length() - 1 ; j++){
+            while (index < query.length()) {
 
-                        if (query.substring(j).startsWith(" ") || j == query.length() - 1){
-
-                            String word = query.substring(i, j).replace(".", "").trim();
-                            System.out.println(word);
-
-                            final Map<String, Object> params = new HashMap<String, Object>();
-                            params.put("term", word);
-                            params.put("field", "text");
-
-                            //restClient.
-
-                            SearchResponse searchResponse = client.prepareSearch("ap_dataset")
-                                    .setTypes("document")
-                                    .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                                    .setQuery(QueryBuilders.functionScoreQuery
-                                            (QueryBuilders.termQuery("text", word),
-                                                    new ScriptScoreFunctionBuilder(new Script( ScriptType.INLINE,"getTF", "groovy", params)))
-
-                                            .boostMode(CombineFunction.REPLACE))
-                                    .setFrom(0)
-                                    .setSize(10000)
-                                    .setExplain(true)
-                                    .addScriptField("getDOCLENGTH", (new Script("doc['text'].values.size()")))
-                                    .get();
-
-                            SearchHits hits = searchResponse.getHits();
-
-                            System.out.println("HITSS : "+hits.totalHits);
-                            for (SearchHit hit:hits) {
-
-                                String DocID = hit.getId();
-                                Float TFWD = hit.getScore();
-                                Integer lenD = (hit.getFields().get("getDOCLENGTH").getValue());
-                            }
-                        }
+                // the only word delimiter supported is space, if you want other
+                // delimiters you have to do a series of indexOf calls and see which
+                // one gives the smallest index, or use regex
+                int nextIndex = query.indexOf(" ", index);
+                if (nextIndex == -1) {
+                    nextIndex = query.length() - 1;
+                }
+                String word = query.substring(index, nextIndex);
+                if (!stopWords.contains(word.toLowerCase())) {
+                    cleanQuery.append(word);
+                    if (nextIndex < query.length()) {
+                        // this adds the word delimiter, e.g. the following space
+                        cleanQuery.append(query.substring(nextIndex, nextIndex + 1));
                     }
                 }
+                index = nextIndex + 1;
             }
-        }
 
+            System.out.println("NEW : " + cleanQuery.toString());
+
+            //Get each word in the query
+            String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
+            for (String word : cleanQueryWords) {
+
+                // Get stem for current word
+                JsonObject stemObj = Json.createObjectBuilder()
+                        .add("analyzer", "my_english")
+                        .add("text", word)
+                        .build();
+
+                HttpEntity stemEntity = new NStringEntity(stemObj.toString(), ContentType.APPLICATION_JSON);
+                Response response = restClient.performRequest("GET", "ap89_dataset/_analyze", Collections.<String, String>emptyMap(), stemEntity);
+
+                ObjectNode stemResponse = parseStringToJson(EntityUtils.toString(response.getEntity()));
+                String stem = "";
+
+                for (JsonNode tokenObj : stemResponse.get("tokens")) {
+                    stem = tokenObj.get("token").asText().replace("\"", "").replace("\'", "\\'");
+                }
+
+                System.out.println(stem);
+
+                // Get TF for given word
+                JsonObject TFObject = Json.createObjectBuilder()
+                        .add("size", 10000)
+                        .add("_source", true)
+                        .add("query", Json.createObjectBuilder()
+                                .add("match", Json.createObjectBuilder()
+                                        .add("text", word)))
+                        .add("script_fields", Json.createObjectBuilder()
+                                .add("index_tf", Json.createObjectBuilder()
+                                        .add("script", Json.createObjectBuilder()
+                                                .add("lang", "groovy")
+                                                .add("inline", "_index['text']['" + stem + "'].tf()")))
+                                .add("doc_length", Json.createObjectBuilder()
+                                        .add("script", Json.createObjectBuilder()
+                                                .add("inline", "doc['text'].values.size()"))))
+                        .build();
+
+                HttpEntity TFEntity = new NStringEntity(TFObject.toString(), ContentType.APPLICATION_JSON);
+
+                Response TFResponse = restClient.performRequest("GET", "/ap89_dataset/_search/?scroll=1m", Collections.<String, String>emptyMap(), TFEntity);
+                ObjectNode TFJSON = parseStringToJson(EntityUtils.toString(TFResponse.getEntity()));
+
+                long numberOfHits = TFJSON.get("hits").get("total").asLong();
+
+                JsonNode hits = TFJSON.get("hits").get("hits");
+
+                for (JsonNode hit : hits) {
+
+                    //System.out.println(hit.toString());
+
+                    String TFWDRaw = hit.get("fields").get("index_tf").toString().replace("[", "").replace("]", "").trim();
+                    int TFWD = TFWDRaw.equals("") ? 0 : Integer.parseInt(TFWDRaw);
+
+                    String DocLengthRaw = hit.get("fields").get("doc_length").toString().replace("[", "").replace("]", "").trim();
+                    int docLegth = TFWDRaw.equals("") ? 0 : Integer.parseInt(DocLengthRaw);
+
+                    String docNo = hit.get("_source").get("docNo").asText();
+
+                    //	System.out.println( DocNo);
+
+                    Float OkapiTFWD = (float) (TFWD / (TFWD + 0.5 + (1.5 * (docLegth / docAverage))));
+                    okapiTFMAP.put(docNo,
+                            okapiTFMAP.get(docNo) == null ? OkapiTFWD : okapiTFMAP.get(docNo) + OkapiTFWD);
+
+                }
+            }
+
+            System.out.println("SIZE : " + okapiTFMAP.size());
+            SortedMap = sortHM(okapiTFMAP);
+            System.out.println("SORTED SIZE : " + SortedMap.size());
+            int rank = 0;
+
+            for (Map.Entry m1 : SortedMap.entrySet()) {
+
+                if (rank < 1000) {
+                    rank = rank + 1;
+                    writer.write(queryNo + " Q0 " + m1.getKey() + " " + rank + " " + m1.getValue() + " OkapiTF\n");
+                    //System.out.println(queryNo + " Q0 " + m1.getKey() + " " + rank + " " + m1.getValue() + " OkapiTF");
+                } else
+                    break;
+            }
+            SortedMap.clear();
+            okapiTFMAP.clear();
+        }
+        writer.close();
         restClient.close();
+        br.close();
+        stopListFileBufferedReader.close();
     }
 
     private static ObjectNode parseStringToJson(String s) throws ParseException, IOException {
 
         return new ObjectMapper().readValue(s, ObjectNode.class);
+    }
+
+    private static HashMap<String, Float> sortHM(Map<String, Float> aMap) {
+
+        Set<Map.Entry<String,Float>> mapEntries = aMap.entrySet();
+        List<Map.Entry<String,Float>> aList = new LinkedList<Map.Entry<String,Float>>(mapEntries);
+
+        Collections.sort(aList, new Comparator<Map.Entry<String,Float>>() {
+
+
+            public int compare(Map.Entry<String, Float> ele1,
+                               Map.Entry<String, Float> ele2) {
+
+                return ele2.getValue().compareTo(ele1.getValue());
+            }
+        });
+
+        Map<String,Float> aMap2 = new LinkedHashMap<String, Float>();
+        for(Map.Entry<String,Float> entry: aList) {
+            aMap2.put(entry.getKey(), entry.getValue());
+        }
+
+        return (HashMap<String, Float>) aMap2;
     }
 }

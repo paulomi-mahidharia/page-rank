@@ -1,68 +1,131 @@
 package edu.neu.ir;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.neu.utility.TermData;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
-import org.apache.lucene.search.Sort;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.lucene.search.function.CombineFunction;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.ScriptScoreFunctionBuilder;
+import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptContext;
+import org.elasticsearch.script.ScriptService;
+import org.elasticsearch.script.ScriptType;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.*;
+import java.net.InetAddress;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Created by paulomimahidharia on 5/21/17.
+ * Created by paulomimahidharia on 5/20/17.
  */
-public class TFID {
+public class TF_IDF {
 
     private final static String HOST = "localhost";
     private final static int PORT = 9200;
     private final static String SCHEME = "http";
     private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
+    private static long DOCCount = 0;
     private final static String STOPLIST_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/stoplist.txt";
-    private static Set<String> stopWords = new HashSet<String>();
-    private static Map<String, List<TermData>> TFIDMap = new HashMap<String, List<TermData>>();
+    private final static String OUTPUT = "TF_IDF.txt";
 
     public static void main(String args[]) throws IOException, ParseException {
 
         File queryFile = new File(QUERY_FILE);
         File stopListFile = new File(STOPLIST_FILE);
-        BufferedReader queryFileBufferedReader = new BufferedReader(new FileReader(queryFile));
-        BufferedReader stopListFileBufferedReader = new BufferedReader(new FileReader(stopListFile));
+        File okapiTFOutput = new File(OUTPUT);
 
         RestClient restClient = RestClient.builder(
                 new HttpHost(HOST, PORT, SCHEME),
                 new HttpHost(HOST, PORT + 1, SCHEME)).build();
 
+        Response countResponse = restClient.performRequest("GET", "/ap_dataset/document/_count");
+        ObjectNode countJson = parseStringToJson(EntityUtils.toString(countResponse.getEntity()));
+        DOCCount = Long.parseLong(countJson.get("count").toString());
+        System.out.println(DOCCount);
+
+        double docAverage = (double) 20976545/84612;
+        BufferedWriter writer = new BufferedWriter(new FileWriter(okapiTFOutput));
+
+        BufferedReader stopListFileBufferedReader = new BufferedReader(new FileReader(stopListFile));
+
         // Read and store StopList terms
+        Set<String> stopWords = new HashSet<String>();
+
         String stopListTerm = null;
         while ((stopListTerm = stopListFileBufferedReader.readLine()) != null) {
             stopWords.add(stopListTerm.trim());
         }
         System.out.println(stopWords.size());
 
-        // Remove StopList terms from the query
+        BufferedReader br = new BufferedReader(new FileReader(queryFile));
         String query = null;
-        while ((query = queryFileBufferedReader.readLine()) != null) {
+        while ((query = br.readLine()) != null) {
 
+            //for each query
             if (query.length() <= 3) {
                 break;
             }
 
-            String queryNo = query.substring(0, 5).replace(".", "").trim();
+            HashMap<String, Float> okapiTFMAP = new HashMap<String, Float>();
+            HashMap<String, Float> SortedMap = new HashMap<String, Float>();
+
+            String queryNo = query.substring(0, 3).replace(".", "").trim();
+
+            System.out.println("QUERY NO : "+queryNo);
+
             query = query.substring(5).trim();
 
-            StringBuffer cleanQuery = removeStopWords(query, stopWords);
+            StringBuffer cleanQuery = new StringBuffer();
+            int index = 0;
+
+            while (index < query.length()) {
+
+                // the only word delimiter supported is space, if you want other
+                // delimiters you have to do a series of indexOf calls and see which
+                // one gives the smallest index, or use regex
+                int nextIndex = query.indexOf(" ", index);
+                if (nextIndex == -1) {
+                    nextIndex = query.length() - 1;
+                }
+                String word = query.substring(index, nextIndex);
+                if (!stopWords.contains(word.toLowerCase())) {
+                    cleanQuery.append(word);
+                    if (nextIndex < query.length()) {
+                        // this adds the word delimiter, e.g. the following space
+                        cleanQuery.append(query.substring(nextIndex, nextIndex + 1));
+                    }
+                }
+                index = nextIndex + 1;
+            }
+
+            System.out.println("NEW : " + cleanQuery.toString());
 
             //Get each word in the query
             String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
@@ -110,12 +173,11 @@ public class TFID {
 
                 long numberOfHits = TFJSON.get("hits").get("total").asLong();
 
-                List<TermData> termDataList = new ArrayList<TermData>();
-
                 JsonNode hits = TFJSON.get("hits").get("hits");
-                TermData termData = null;
 
                 for (JsonNode hit : hits) {
+
+                    //System.out.println(hit.toString());
 
                     String TFWDRaw = hit.get("fields").get("index_tf").toString().replace("[", "").replace("]", "").trim();
                     int TFWD = TFWDRaw.equals("") ? 0 : Integer.parseInt(TFWDRaw);
@@ -125,95 +187,50 @@ public class TFID {
 
                     String docNo = hit.get("_source").get("docNo").asText();
 
-                    termData = new TermData(docNo, TFWD, docLegth, numberOfHits);
-                    termDataList.add(termData);
-                }
+                    //	System.out.println( DocNo);
 
-                if (TFIDMap.containsKey(word)) {
-                    List<TermData> termDataListExisting = TFIDMap.get(word);
-                    termDataListExisting.addAll(termDataList);
-                    TFIDMap.put(word, termDataListExisting);
-                } else
-                    TFIDMap.put(word, termDataList);
-            }
-        }
+                    Float OkapiTFWD = (float) (TFWD / (TFWD + 0.5 + (1.5 * (docLegth / docAverage))));
+                    Float TF_IDFWD = (float) (OkapiTFWD * (Math.log(DOCCount/numberOfHits)));
+                    okapiTFMAP.put(docNo,
+                            okapiTFMAP.get(docNo) == null ? TF_IDFWD : okapiTFMAP.get(docNo) + TF_IDFWD);
 
-        restClient.close();
-        queryFileBufferedReader.close();
-        stopListFileBufferedReader.close();
-
-        calculateOkapi();
-    }
-
-    private static void calculateOkapi() throws IOException {
-
-        File queryFile = new File(QUERY_FILE);
-        BufferedReader queryFileBufferedReader = new BufferedReader(new FileReader(queryFile));
-        double docAverage = (double) 20976545 / 84612;
-
-        String query = null;
-        while ((query = queryFileBufferedReader.readLine()) != null) {
-
-            if (query.length() <= 3) {
-                break;
-            }
-
-            String queryNo = query.substring(0, 5).replace(".", "").trim();
-            query = query.substring(5).trim();
-
-            StringBuffer cleanQuery = removeStopWords(query, stopWords);
-            HashMap<String, Float> okapiTFMAP = new HashMap<String, Float>();
-            HashMap<String, Float> SortedMap;
-
-            //Get each word in the query
-            String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
-            for (String word : cleanQueryWords) {
-
-                System.out.println("TFIDMAP SIZE :" +TFIDMap.get(word).size());
-
-                for (TermData termData : TFIDMap.get(word)) {
-
-                    String DocID = termData.getDocID();
-                    int TFWD = termData.getTFWD();
-                    long lenD = termData.getDocLength();
-
-                    Float OkapiTFWD = (float) (TFWD / (TFWD + 0.5 + (1.5 * (lenD / docAverage))));
-                    okapiTFMAP.put(DocID, okapiTFMAP.containsKey(DocID) ? (okapiTFMAP.get(DocID) + OkapiTFWD) : OkapiTFWD);
                 }
             }
 
-            System.out.println("Okapi SIZE : " + okapiTFMAP.size());
+            System.out.println("SIZE : " + okapiTFMAP.size());
             SortedMap = sortHM(okapiTFMAP);
-            System.out.println("SortedMap SIZE : " + SortedMap.size());
-            PrintWriter writer = new PrintWriter("okapi_TF.txt", "UTF-8");
+            System.out.println("SORTED SIZE : " + SortedMap.size());
             int rank = 0;
-
-            for(String key : SortedMap.keySet()){
-                System.out.println(key + " : "+ SortedMap.get(key));
-            }
 
             for (Map.Entry m1 : SortedMap.entrySet()) {
 
-                while (rank < 1000) {
+                if (rank < 1000) {
                     rank = rank + 1;
-                    System.out.println(queryNo + "  Q0  " + m1.getKey() + "  " + rank + "  " + m1.getValue() + "  OkapiTF");
-                }
+                    writer.write(queryNo + " Q0 " + m1.getKey() + " " + rank + " " + m1.getValue() + " TF_IDF\n");
+                    //System.out.println(queryNo + " Q0 " + m1.getKey() + " " + rank + " " + m1.getValue() + " OkapiTF");
+                } else
+                    break;
             }
-
             SortedMap.clear();
             okapiTFMAP.clear();
         }
-
-        System.out.println("DONE !");
-        queryFileBufferedReader.close();
+        writer.close();
+        restClient.close();
+        br.close();
+        stopListFileBufferedReader.close();
     }
 
-    private static HashMap<String, Float> sortHM(HashMap<String, Float> okapiTFMAP) {
+    private static ObjectNode parseStringToJson(String s) throws ParseException, IOException {
 
-        Set<Map.Entry<String, Float>> mapEntries = okapiTFMAP.entrySet();
-        List<Map.Entry<String, Float>> aList = new LinkedList<Map.Entry<String, Float>>(mapEntries);
+        return new ObjectMapper().readValue(s, ObjectNode.class);
+    }
 
-        Collections.sort(aList, new Comparator<Map.Entry<String, Float>>() {
+    private static HashMap<String, Float> sortHM(Map<String, Float> aMap) {
+
+        Set<Map.Entry<String,Float>> mapEntries = aMap.entrySet();
+        List<Map.Entry<String,Float>> aList = new LinkedList<Map.Entry<String,Float>>(mapEntries);
+
+        Collections.sort(aList, new Comparator<Map.Entry<String,Float>>() {
 
 
             public int compare(Map.Entry<String, Float> ele1,
@@ -223,41 +240,11 @@ public class TFID {
             }
         });
 
-        Map<String, Float> aMap2 = new LinkedHashMap<String, Float>();
-        for (Map.Entry<String, Float> entry : aList) {
+        Map<String,Float> aMap2 = new LinkedHashMap<String, Float>();
+        for(Map.Entry<String,Float> entry: aList) {
             aMap2.put(entry.getKey(), entry.getValue());
         }
 
         return (HashMap<String, Float>) aMap2;
-    }
-
-    private static StringBuffer removeStopWords(String query, Set<String> stopWords) {
-
-        int index = 0;
-        StringBuffer cleanQuery = new StringBuffer();
-
-        while (index < query.length()) {
-
-            int nextIndex = query.indexOf(" ", index);
-            if (nextIndex == -1) {
-                nextIndex = query.length() - 1;
-            }
-            String word = query.substring(index, nextIndex);
-            if (!stopWords.contains(word.toLowerCase())) {
-                cleanQuery.append(word);
-                if (nextIndex < query.length()) {
-                    // this adds the word delimiter, e.g. the following space
-                    cleanQuery.append(query.substring(nextIndex, nextIndex + 1));
-                }
-            }
-            index = nextIndex + 1;
-        }
-
-        return cleanQuery;
-    }
-
-    private static ObjectNode parseStringToJson(String s) throws ParseException, IOException {
-
-        return new ObjectMapper().readValue(s, ObjectNode.class);
     }
 }
