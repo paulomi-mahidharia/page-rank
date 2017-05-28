@@ -25,7 +25,7 @@ import static edu.neu.utility.QueryProcessing.removeStopWordsFromQuery;
 import static edu.neu.utility.SortMap.sortMapByScore;
 import static edu.neu.utility.SortMap.sortMapByScoreDouble;
 
-public class Extra {
+public class LaplaceSmoothing {
 
     private final static String HOST = "localhost";
     private final static int PORT = 9200;

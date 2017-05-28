@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="23ab4160-a32e-47f3-a6bf-93679cf356b4" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/neu/ir/Extra.class" afterPath="$PROJECT_DIR$/target/classes/edu/neu/ir/Extra.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/neu/ir/okapiTF.class" afterPath="$PROJECT_DIR$/target/classes/edu/neu/ir/okapiTF.class" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/ir/LaplaceSmoothing.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/neu/ir/Laplace.java" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/ir/Laplace.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/neu/utility/SortMap.java" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/utility/SortMap.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -197,21 +193,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Extra.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java">
+      <file leaf-file-name="LaplaceSmoothing.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/LaplaceSmoothing.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="265">
-              <caret line="203" column="57" lean-forward="false" selection-start-line="203" selection-start-column="57" selection-end-line="203" selection-end-column="57" />
+            <state relative-caret-position="-5">
+              <caret line="193" column="55" lean-forward="true" selection-start-line="193" selection-start-column="55" selection-end-line="193" selection-end-column="55" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1875#1883#0" expanded="true" />
-                <element signature="e#2002#2155#0" expanded="true" />
-                <element signature="e#2154#2155#0" expanded="true" />
-                <element signature="e#3110#3143#0" expanded="true" />
-                <element signature="e#3573#3593#0" expanded="true" />
-                <element signature="e#4448#4464#0" expanded="true" />
-                <element signature="e#7362#7378#0" expanded="true" />
-                <element signature="e#7441#7457#0" expanded="true" />
+                <element signature="e#1886#1894#0" expanded="true" />
+                <element signature="e#2013#2166#0" expanded="true" />
+                <element signature="e#2165#2166#0" expanded="true" />
+                <element signature="e#3121#3154#0" expanded="true" />
+                <element signature="e#3584#3604#0" expanded="true" />
+                <element signature="e#4459#4475#0" expanded="true" />
+                <element signature="e#7373#7389#0" expanded="true" />
+                <element signature="e#7452#7468#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -288,6 +284,7 @@
         <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/TermTFBean.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/neu/utility/SortMap.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/LaplaceSmoothing.java" />
       </list>
     </option>
   </component>
@@ -495,7 +492,7 @@
       <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Extra">
+  <component name="RunManager" selected="Application.LaplaceSmoothing">
     <configuration default="false" name="okapiTF" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -576,14 +573,14 @@
       <envs />
       <method />
     </configuration>
-    <configuration default="false" name="Extra" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="LaplaceSmoothing" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
           <option name="PATTERN" value="edu.neu.ir.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="MAIN_CLASS_NAME" value="edu.neu.ir.Extra" />
+      <option name="MAIN_CLASS_NAME" value="edu.neu.ir.LaplaceSmoothing" />
       <option name="VM_PARAMETERS" />
       <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -1032,11 +1029,11 @@
       <item index="1" class="java.lang.String" itemvalue="Application.TF_IDF" />
       <item index="2" class="java.lang.String" itemvalue="Application.OkapiBM25" />
       <item index="3" class="java.lang.String" itemvalue="Application.Laplace" />
-      <item index="4" class="java.lang.String" itemvalue="Application.Extra" />
+      <item index="4" class="java.lang.String" itemvalue="Application.LaplaceSmoothing" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Application.Extra" />
+        <item index="0" class="java.lang.String" itemvalue="Application.LaplaceSmoothing" />
         <item index="1" class="java.lang.String" itemvalue="Application.Laplace" />
         <item index="2" class="java.lang.String" itemvalue="Application.OkapiBM25" />
         <item index="3" class="java.lang.String" itemvalue="Application.TF_IDF" />
@@ -1072,11 +1069,11 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="104976000" />
+    <option name="totallyTimeSpent" value="105215000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1098,7 +1095,7 @@
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.390625" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.390625" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31676137" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26171243" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1195,7 +1192,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/LaplaceSmoothing.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1335">
           <caret line="102" column="52" lean-forward="false" selection-start-line="102" selection-start-column="52" selection-end-line="102" selection-end-column="52" />
@@ -1338,7 +1335,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/LaplaceSmoothing.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="107" column="8" lean-forward="false" selection-start-line="107" selection-start-column="8" selection-end-line="107" selection-end-column="8" />
@@ -1422,7 +1419,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/LaplaceSmoothing.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1335">
           <caret line="102" column="52" lean-forward="false" selection-start-line="102" selection-start-column="52" selection-end-line="102" selection-end-column="52" />
@@ -1778,20 +1775,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/LaplaceSmoothing.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="265">
-          <caret line="203" column="57" lean-forward="false" selection-start-line="203" selection-start-column="57" selection-end-line="203" selection-end-column="57" />
+        <state relative-caret-position="-5">
+          <caret line="193" column="55" lean-forward="true" selection-start-line="193" selection-start-column="55" selection-end-line="193" selection-end-column="55" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1875#1883#0" expanded="true" />
-            <element signature="e#2002#2155#0" expanded="true" />
-            <element signature="e#2154#2155#0" expanded="true" />
-            <element signature="e#3110#3143#0" expanded="true" />
-            <element signature="e#3573#3593#0" expanded="true" />
-            <element signature="e#4448#4464#0" expanded="true" />
-            <element signature="e#7362#7378#0" expanded="true" />
-            <element signature="e#7441#7457#0" expanded="true" />
+            <element signature="e#1886#1894#0" expanded="true" />
+            <element signature="e#2013#2166#0" expanded="true" />
+            <element signature="e#2165#2166#0" expanded="true" />
+            <element signature="e#3121#3154#0" expanded="true" />
+            <element signature="e#3584#3604#0" expanded="true" />
+            <element signature="e#4459#4475#0" expanded="true" />
+            <element signature="e#7373#7389#0" expanded="true" />
+            <element signature="e#7452#7468#0" expanded="true" />
           </folding>
         </state>
       </provider>
