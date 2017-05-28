@@ -42,6 +42,11 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static edu.neu.utility.JsonProcessing.parseStringToJson;
+import static edu.neu.utility.QueryProcessing.getStopWords;
+import static edu.neu.utility.QueryProcessing.removeStopWordsFromQuery;
+import static edu.neu.utility.SortMap.sortMapByScore;
+
 /**
  * Created by paulomimahidharia on 5/20/17.
  */
@@ -52,13 +57,16 @@ public class OkapiBM25 {
     private final static String SCHEME = "http";
     private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
     private static long DOCCount = 0;
-    private final static String STOPLIST_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/stoplist.txt";
     private final static String OUTPUT = "OkapiBM25.txt";
+    private static  HashMap<String, Float> okapiBM25Map = null;
+    private final static  double docAverage = (double) 20976545/84612;
+    private final static  float b = (float) 0.75;
+    private final static  float k1 = (float) 1.2;
+    private final static  float k2 = (float) 100;
 
     public static void main(String args[]) throws IOException, ParseException {
 
         File queryFile = new File(QUERY_FILE);
-        File stopListFile = new File(STOPLIST_FILE);
         File okapiTFOutput = new File(OUTPUT);
 
         RestClient restClient = RestClient.builder(
@@ -68,27 +76,14 @@ public class OkapiBM25 {
         Response countResponse = restClient.performRequest("GET", "/ap_dataset/document/_count");
         ObjectNode countJson = parseStringToJson(EntityUtils.toString(countResponse.getEntity()));
         DOCCount = Long.parseLong(countJson.get("count").toString());
-        System.out.println(DOCCount);
 
-        double docAverage = (double) 20976545/84612;
-        float b = (float) 0.75;
-        float k1 = (float) 1.2;
-        float k2 = (float) 100;
         BufferedWriter writer = new BufferedWriter(new FileWriter(okapiTFOutput));
 
-        BufferedReader stopListFileBufferedReader = new BufferedReader(new FileReader(stopListFile));
-
         // Read and store StopList terms
-        Set<String> stopWords = new HashSet<String>();
-
-        String stopListTerm = null;
-        while ((stopListTerm = stopListFileBufferedReader.readLine()) != null) {
-            stopWords.add(stopListTerm.trim());
-        }
-        System.out.println(stopWords.size());
+        Set<String> stopWords = getStopWords();
 
         BufferedReader br = new BufferedReader(new FileReader(queryFile));
-        String query = null;
+        String query;
         while ((query = br.readLine()) != null) {
 
             //for each query
@@ -96,39 +91,13 @@ public class OkapiBM25 {
                 break;
             }
 
-            HashMap<String, Float> okapiTFMAP = new HashMap<String, Float>();
-            HashMap<String, Float> SortedMap = new HashMap<String, Float>();
+            okapiBM25Map = new HashMap<String, Float>();
+            HashMap<String, Float> SortedMap;
 
             String queryNo = query.substring(0, 3).replace(".", "").trim();
-
-            System.out.println("QUERY NO : "+queryNo);
-
             query = query.substring(5).trim();
 
-            StringBuffer cleanQuery = new StringBuffer();
-            int index = 0;
-
-            while (index < query.length()) {
-
-                // the only word delimiter supported is space, if you want other
-                // delimiters you have to do a series of indexOf calls and see which
-                // one gives the smallest index, or use regex
-                int nextIndex = query.indexOf(" ", index);
-                if (nextIndex == -1) {
-                    nextIndex = query.length() - 1;
-                }
-                String word = query.substring(index, nextIndex);
-                if (!stopWords.contains(word.toLowerCase())) {
-                    cleanQuery.append(word);
-                    if (nextIndex < query.length()) {
-                        // this adds the word delimiter, e.g. the following space
-                        cleanQuery.append(query.substring(nextIndex, nextIndex + 1));
-                    }
-                }
-                index = nextIndex + 1;
-            }
-
-            System.out.println("NEW : " + cleanQuery.toString());
+            StringBuffer cleanQuery = removeStopWordsFromQuery(query, stopWords);
 
             //Get each word in the query
             String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
@@ -187,31 +156,39 @@ public class OkapiBM25 {
 
                 for (JsonNode hit : hits) {
 
-                    //System.out.println(hit.toString());
+                    updateMap(hit, numberOfHits, TFWQ);
+                }
 
-                    String TFWDRaw = hit.get("fields").get("index_tf").toString().replace("[", "").replace("]", "").trim();
-                    int TFWD = TFWDRaw.equals("") ? 0 : Integer.parseInt(TFWDRaw);
+                String scrollId = "";
+                long totalHits = numberOfHits;
 
-                    String DocLengthRaw = hit.get("fields").get("doc_length").toString().replace("[", "").replace("]", "").trim();
-                    int docLegth = TFWDRaw.equals("") ? 0 : Integer.parseInt(DocLengthRaw);
+                if (totalHits > 10000) {
 
-                    String docNo = hit.get("_source").get("docNo").asText();
+                    scrollId = TFJSON.get("_scroll_id").asText();
+                    while(totalHits > 10000) {
 
-                    //	System.out.println( DocNo);
+                        JsonObject okaiBM25ScrollObject = Json.createObjectBuilder()
+                                .add("scroll", "1m")
+                                .add("scroll_id", scrollId)
+                                .build();
 
-                    //Float OkapiTFWD = (float) (TFWD / (TFWD + 0.5 + (1.5 * (docLegth / docAverage))));
-                    //Float TF_IDFWD = (float) (OkapiTFWD * (Math.log(DOCCount/numberOfHits)));
-                    Float  OkapiBM25 = (float) (Math.log((DOCCount+0.5)/(numberOfHits + 0.5))*((TFWD+(k1*TFWD))/(TFWD+k1*((1-b)+b*(docLegth / docAverage)))) * ((TFWQ + (k2 * TFWQ)) / (TFWQ + k2)));
+                        HttpEntity okapiBM25ScrollEntity = new NStringEntity(okaiBM25ScrollObject.toString(), ContentType.APPLICATION_JSON);
+                        Response okapiBM25ScrollResponse = restClient.performRequest("POST", "/_search/scroll", Collections.<String, String>emptyMap(), okapiBM25ScrollEntity);
+                        ObjectNode okapiBM25ScrollJSON = parseStringToJson(EntityUtils.toString(okapiBM25ScrollResponse.getEntity()));
 
-                    okapiTFMAP.put(docNo,
-                            okapiTFMAP.get(docNo) == null ? OkapiBM25 : okapiTFMAP.get(docNo) + OkapiBM25);
+                        JsonNode scrollHits = okapiBM25ScrollJSON.get("hits").get("hits");
 
+                        for (JsonNode hit : scrollHits) {
+                            updateMap(hit, numberOfHits, TFWQ);
+                        }
+
+                        scrollId = okapiBM25ScrollJSON.get("_scroll_id").asText();
+                        totalHits = totalHits - 10000;
+                    }
                 }
             }
 
-            System.out.println("SIZE : " + okapiTFMAP.size());
-            SortedMap = sortHM(okapiTFMAP);
-            System.out.println("SORTED SIZE : " + SortedMap.size());
+            SortedMap = sortMapByScore(okapiBM25Map);
             int rank = 0;
 
             for (Map.Entry m1 : SortedMap.entrySet()) {
@@ -223,39 +200,25 @@ public class OkapiBM25 {
                     break;
             }
             SortedMap.clear();
-            okapiTFMAP.clear();
+            okapiBM25Map.clear();
         }
         writer.close();
         restClient.close();
         br.close();
-        stopListFileBufferedReader.close();
     }
 
-    private static ObjectNode parseStringToJson(String s) throws ParseException, IOException {
+    private static void updateMap(JsonNode hit, long numberOfHits, int TFWQ){
 
-        return new ObjectMapper().readValue(s, ObjectNode.class);
-    }
+        String TFWDRaw = hit.get("fields").get("index_tf").toString().replace("[", "").replace("]", "").trim();
+        int TFWD = TFWDRaw.equals("") ? 0 : Integer.parseInt(TFWDRaw);
 
-    private static HashMap<String, Float> sortHM(Map<String, Float> aMap) {
+        String DocLengthRaw = hit.get("fields").get("doc_length").toString().replace("[", "").replace("]", "").trim();
+        int docLegth = TFWDRaw.equals("") ? 0 : Integer.parseInt(DocLengthRaw);
 
-        Set<Map.Entry<String,Float>> mapEntries = aMap.entrySet();
-        List<Map.Entry<String,Float>> aList = new LinkedList<Map.Entry<String,Float>>(mapEntries);
+        String docNo = hit.get("_source").get("docNo").asText();
 
-        Collections.sort(aList, new Comparator<Map.Entry<String,Float>>() {
-
-
-            public int compare(Map.Entry<String, Float> ele1,
-                               Map.Entry<String, Float> ele2) {
-
-                return ele2.getValue().compareTo(ele1.getValue());
-            }
-        });
-
-        Map<String,Float> aMap2 = new LinkedHashMap<String, Float>();
-        for(Map.Entry<String,Float> entry: aList) {
-            aMap2.put(entry.getKey(), entry.getValue());
-        }
-
-        return (HashMap<String, Float>) aMap2;
+        Float OkapiBM25 = (float) (Math.log((DOCCount+0.5)/(numberOfHits + 0.5))*((TFWD+(k1*TFWD))/(TFWD+k1*((1-b)+b*(docLegth / docAverage)))) * ((TFWQ + (k2 * TFWQ)) / (TFWQ + k2)));
+        okapiBM25Map.put(docNo,
+                okapiBM25Map.get(docNo) == null ? OkapiBM25 : okapiBM25Map.get(docNo) + OkapiBM25);
     }
 }

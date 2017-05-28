@@ -2,8 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="23ab4160-a32e-47f3-a6bf-93679cf356b4" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/oldresults/1/OkapiBM25.txt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/utility/JsonProcessing.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/utility/QueryProcessing.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/utility/SortMap.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/OkapiBM25.txt" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/TF_IDF.txt" afterPath="$PROJECT_DIR$/oldresults/1/TF_IDF.txt" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/okapiTF.txt" afterPath="$PROJECT_DIR$/oldresults/1/okapiTF.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/neu/ir/Extra$1.class" afterPath="$PROJECT_DIR$/target/classes/edu/neu/ir/Extra$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/neu/ir/Extra.class" afterPath="$PROJECT_DIR$/target/classes/edu/neu/ir/Extra.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/neu/ir/okapiTF.class" afterPath="$PROJECT_DIR$/target/classes/edu/neu/ir/okapiTF.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/neu/ir/Laplace.java" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/ir/Laplace.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/neu/ir/OkapiBM25.java" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/ir/OkapiBM25.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/neu/ir/TF_IDF.java" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/ir/TF_IDF.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/neu/ir/okapiTF.java" afterPath="$PROJECT_DIR$/src/main/java/edu/neu/ir/okapiTF.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -77,21 +91,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="227">
-              <caret line="88" column="0" lean-forward="false" selection-start-line="88" selection-start-column="0" selection-end-line="88" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Indexer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Indexer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="205">
-              <caret line="108" column="77" lean-forward="false" selection-start-line="108" selection-start-column="14" selection-end-line="108" selection-end-column="77" />
+            <state relative-caret-position="264">
+              <caret line="96" column="13" lean-forward="true" selection-start-line="96" selection-start-column="13" selection-end-line="96" selection-end-column="13" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -102,19 +106,29 @@
       <file leaf-file-name="okapiTF.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/okapiTF.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="47" column="22" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="250" selection-end-column="0" />
+            <state relative-caret-position="372">
+              <caret line="185" column="5" lean-forward="true" selection-start-line="172" selection-start-column="4" selection-end-line="185" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#3402#3410#0" expanded="true" />
-                <element signature="e#3957#3972#0" expanded="true" />
-                <element signature="e#4034#4049#0" expanded="true" />
-                <element signature="e#5948#5964#0" expanded="true" />
-                <element signature="e#7680#7696#0" expanded="true" />
-                <element signature="e#10121#10146#0" expanded="true" />
-                <element signature="e#10193#10456#0" expanded="true" />
-                <element signature="e#10455#10456#0" expanded="true" />
-                <element signature="e#10511#10526#0" expanded="true" />
+                <element signature="e#2566#2581#0" expanded="true" />
+                <element signature="e#3488#3504#0" expanded="true" />
+                <element signature="e#5219#5235#0" expanded="true" />
+                <element signature="e#6294#6310#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SortMap.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/utility/SortMap.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="9" column="55" lean-forward="false" selection-start-line="9" selection-start-column="41" selection-end-line="9" selection-end-column="55" />
+              <folding>
+                <element signature="e#334#360#0" expanded="true" />
+                <element signature="e#407#671#0" expanded="true" />
+                <element signature="e#670#671#0" expanded="true" />
+                <element signature="e#727#742#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -123,19 +137,38 @@
       <file leaf-file-name="TF_IDF.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/TF_IDF.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-615">
-              <caret line="55" column="54" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="250" selection-end-column="0" />
+            <state relative-caret-position="399">
+              <caret line="191" column="5" lean-forward="false" selection-start-line="177" selection-start-column="4" selection-end-line="191" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#3399#3407#0" expanded="true" />
-                <element signature="e#3954#3969#0" expanded="true" />
-                <element signature="e#4031#4046#0" expanded="true" />
-                <element signature="e#5945#5961#0" expanded="true" />
-                <element signature="e#7677#7693#0" expanded="true" />
-                <element signature="e#10209#10234#0" expanded="true" />
-                <element signature="e#10281#10544#0" expanded="true" />
-                <element signature="e#10543#10544#0" expanded="true" />
-                <element signature="e#10599#10614#0" expanded="true" />
+                <element signature="e#3468#3484#0" expanded="true" />
+                <element signature="e#5200#5216#0" expanded="true" />
+                <element signature="e#6403#6419#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="QueryProcessing.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/utility/QueryProcessing.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="195">
+              <caret line="13" column="55" lean-forward="false" selection-start-line="13" selection-start-column="31" selection-end-line="13" selection-end-column="55" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#1628#1636#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="JsonProcessing.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/utility/JsonProcessing.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="10" column="3" lean-forward="true" selection-start-line="10" selection-start-column="3" selection-end-line="10" selection-end-column="3" />
+              <folding>
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -144,66 +177,59 @@
       <file leaf-file-name="OkapiBM25.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/OkapiBM25.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="203" column="193" lean-forward="false" selection-start-line="203" selection-start-column="193" selection-end-line="203" selection-end-column="193" />
+            <state relative-caret-position="384">
+              <caret line="246" column="99" lean-forward="false" selection-start-line="246" selection-start-column="99" selection-end-line="246" selection-end-column="99" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#3501#3509#0" expanded="true" />
-                <element signature="e#4056#4071#0" expanded="true" />
-                <element signature="e#4133#4148#0" expanded="true" />
-                <element signature="e#6263#6279#0" expanded="true" />
-                <element signature="e#7995#8011#0" expanded="true" />
-                <element signature="e#10613#10638#0" expanded="true" />
-                <element signature="e#10685#10948#0" expanded="true" />
-                <element signature="e#10947#10948#0" expanded="true" />
-                <element signature="e#11003#11018#0" expanded="true" />
+                <element signature="e#4920#4936#0" expanded="true" />
+                <element signature="e#6652#6668#0" expanded="true" />
+                <element signature="e#8613#8629#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TFID.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/TFID.java">
+      <file leaf-file-name="Laplace.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Laplace.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="686">
-              <caret line="125" column="76" lean-forward="true" selection-start-line="119" selection-start-column="20" selection-end-line="125" selection-end-column="76" />
+            <state relative-caret-position="-825">
+              <caret line="146" column="38" lean-forward="true" selection-start-line="146" selection-start-column="38" selection-end-line="146" selection-end-column="39" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1227#1235#0" expanded="true" />
-                <element signature="e#1307#1331#0" expanded="true" />
-                <element signature="e#3198#3214#0" expanded="true" />
-                <element signature="e#4930#4946#0" expanded="true" />
-                <element signature="e#5209#5219#0" expanded="true" />
-                <element signature="e#7229#7244#0" expanded="true" />
-                <element signature="e#9125#9151#0" expanded="true" />
-                <element signature="e#9198#9462#0" expanded="true" />
-                <element signature="e#9461#9462#0" expanded="true" />
-                <element signature="e#9518#9533#0" expanded="true" />
+                <element signature="e#1676#1684#0" expanded="true" />
+                <element signature="e#1803#1956#0" expanded="true" />
+                <element signature="e#1955#1956#0" expanded="true" />
+                <element signature="e#4142#4158#0" expanded="true" />
+                <element signature="e#4881#4889#0" expanded="true" />
+                <element signature="e#5176#5191#0" expanded="true" />
+                <element signature="e#5249#5264#0" expanded="true" />
+                <element signature="e#5590#5605#0" expanded="true" />
+                <element signature="e#7705#7721#0" expanded="true" />
+                <element signature="e#10110#10126#0" expanded="true" />
+                <element signature="e#12887#12913#0" expanded="true" />
+                <element signature="e#12960#13224#0" expanded="true" />
+                <element signature="e#13223#13224#0" expanded="true" />
+                <element signature="e#13280#13295#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TermData.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/utility/TermData.java">
+      <file leaf-file-name="Extra.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="16" column="35" lean-forward="false" selection-start-line="16" selection-start-column="35" selection-end-line="16" selection-end-column="35" />
+            <state relative-caret-position="119">
+              <caret line="143" column="115" lean-forward="true" selection-start-line="143" selection-start-column="115" selection-end-line="143" selection-end-column="115" />
               <folding>
-                <element signature="e#446#447#0" expanded="true" />
-                <element signature="e#474#475#0" expanded="true" />
-                <element signature="e#516#517#0" expanded="true" />
-                <element signature="e#550#551#0" expanded="true" />
-                <element signature="e#644#645#0" expanded="true" />
-                <element signature="e#676#677#0" expanded="true" />
-                <element signature="e#710#711#0" expanded="true" />
-                <element signature="e#742#743#0" expanded="true" />
-                <element signature="e#789#790#0" expanded="true" />
-                <element signature="e#831#832#0" expanded="true" />
-                <element signature="e#865#866#0" expanded="true" />
-                <element signature="e#897#898#0" expanded="true" />
-                <element signature="e#945#946#0" expanded="true" />
-                <element signature="e#987#988#0" expanded="true" />
+                <element signature="imports" expanded="true" />
+                <element signature="e#1145#1161#0" expanded="true" />
+                <element signature="e#3581#3596#0" expanded="true" />
+                <element signature="e#3654#3669#0" expanded="true" />
+                <element signature="e#4752#4768#0" expanded="true" />
+                <element signature="e#7811#7833#0" expanded="true" />
+                <element signature="e#7880#8132#0" expanded="true" />
+                <element signature="e#8131#8132#0" expanded="true" />
+                <element signature="e#8188#8203#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -218,6 +244,13 @@
       </list>
     </option>
   </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>hmDocs</find>
+      <find>m.get</find>
+      <find>parseStringToJson</find>
+    </findStrings>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -230,7 +263,6 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/src/main/resources/log4j2.properties" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/Indexer.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
@@ -238,6 +270,11 @@
         <option value="$PROJECT_DIR$/okapi_TF.txt" />
         <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/TFID.java" />
         <option value="$PROJECT_DIR$/okapiTF.txt" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/Laplace.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/neu/utility/QueryProcessing.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/neu/utility/SortMap.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/neu/utility/JsonProcessing.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/okapiTF.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/TF_IDF.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/neu/ir/OkapiBM25.java" />
@@ -350,6 +387,10 @@
               <option name="myItemId" value="neu" />
               <option name="myItemType" value="com.atlassian.clover.idea.projectview.PsiDirectoryNodeWrapper" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="utility" />
+              <option name="myItemType" value="com.atlassian.clover.idea.projectview.PsiDirectoryNodeWrapper" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -385,6 +426,42 @@
               <option name="myItemType" value="com.atlassian.clover.idea.projectview.PsiDirectoryNodeWrapper" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RetrievalModels" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RetrievalModels" />
+              <option name="myItemType" value="com.atlassian.clover.idea.projectview.PsiDirectoryNodeWrapper" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="oldresults" />
+              <option name="myItemType" value="com.atlassian.clover.idea.projectview.PsiDirectoryNodeWrapper" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="2" />
+              <option name="myItemType" value="com.atlassian.clover.idea.projectview.PsiDirectoryNodeWrapper" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RetrievalModels" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RetrievalModels" />
+              <option name="myItemType" value="com.atlassian.clover.idea.projectview.PsiDirectoryNodeWrapper" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="oldresults" />
+              <option name="myItemType" value="com.atlassian.clover.idea.projectview.PsiDirectoryNodeWrapper" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="1" />
+              <option name="myItemType" value="com.atlassian.clover.idea.projectview.PsiDirectoryNodeWrapper" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
       <pane id="PackagesPane" />
@@ -405,30 +482,14 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/oldresults/2" />
+      <recent name="$PROJECT_DIR$/oldresults/1" />
+      <recent name="$PROJECT_DIR$/oldresults" />
+      <recent name="$PROJECT_DIR$/src/main/java/edu/neu/utility" />
       <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.OkapiBM25">
-    <configuration default="false" name="TFID" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="edu.neu.ir.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="MAIN_CLASS_NAME" value="edu.neu.ir.TFID" />
-      <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="" />
-      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-      <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="RetrievalModels" />
-      <envs />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Application.okapiTF">
     <configuration default="false" name="okapiTF" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -437,26 +498,6 @@
         </pattern>
       </extension>
       <option name="MAIN_CLASS_NAME" value="edu.neu.ir.okapiTF" />
-      <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="" />
-      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="RetrievalModels" />
-      <envs />
-      <method />
-    </configuration>
-    <configuration default="false" name="Indexer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="edu.neu.ir.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="MAIN_CLASS_NAME" value="edu.neu.ir.Indexer" />
       <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
@@ -497,6 +538,46 @@
         </pattern>
       </extension>
       <option name="MAIN_CLASS_NAME" value="edu.neu.ir.OkapiBM25" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="RetrievalModels" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="false" name="Laplace" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="edu.neu.ir.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="edu.neu.ir.Laplace" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="RetrievalModels" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="false" name="Extra" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="edu.neu.ir.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="edu.neu.ir.Extra" />
       <option name="VM_PARAMETERS" />
       <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -941,19 +1022,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Application.TFID" />
-      <item index="1" class="java.lang.String" itemvalue="Application.okapiTF" />
-      <item index="2" class="java.lang.String" itemvalue="Application.Indexer" />
-      <item index="3" class="java.lang.String" itemvalue="Application.TF_IDF" />
-      <item index="4" class="java.lang.String" itemvalue="Application.OkapiBM25" />
+      <item index="0" class="java.lang.String" itemvalue="Application.okapiTF" />
+      <item index="1" class="java.lang.String" itemvalue="Application.TF_IDF" />
+      <item index="2" class="java.lang.String" itemvalue="Application.OkapiBM25" />
+      <item index="3" class="java.lang.String" itemvalue="Application.Laplace" />
+      <item index="4" class="java.lang.String" itemvalue="Application.Extra" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Application.OkapiBM25" />
-        <item index="1" class="java.lang.String" itemvalue="Application.TF_IDF" />
-        <item index="2" class="java.lang.String" itemvalue="Application.okapiTF" />
-        <item index="3" class="java.lang.String" itemvalue="Application.TFID" />
-        <item index="4" class="java.lang.String" itemvalue="Application.Indexer" />
+        <item index="0" class="java.lang.String" itemvalue="Application.okapiTF" />
+        <item index="1" class="java.lang.String" itemvalue="Application.OkapiBM25" />
+        <item index="2" class="java.lang.String" itemvalue="Application.TF_IDF" />
+        <item index="3" class="java.lang.String" itemvalue="Application.Extra" />
+        <item index="4" class="java.lang.String" itemvalue="Application.Laplace" />
       </list>
     </recent_temporary>
   </component>
@@ -985,11 +1066,11 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="76917000" />
+    <option name="totallyTimeSpent" value="91707000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1011,9 +1092,9 @@
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5369318" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18892045" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31676137" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26171243" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26171243" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -1074,14 +1155,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1185">
-          <caret line="79" column="36" lean-forward="false" selection-start-line="79" selection-start-column="36" selection-end-line="79" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Indexer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1098,15 +1171,10 @@
           <caret line="101" column="0" lean-forward="false" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#3402#3410#0" expanded="true" />
-            <element signature="e#3957#3972#0" expanded="true" />
-            <element signature="e#4034#4049#0" expanded="true" />
-            <element signature="e#5948#5964#0" expanded="true" />
-            <element signature="e#7680#7696#0" expanded="true" />
-            <element signature="e#10121#10146#0" expanded="true" />
-            <element signature="e#10193#10456#0" expanded="true" />
-            <element signature="e#10455#10456#0" expanded="true" />
-            <element signature="e#10511#10526#0" expanded="true" />
+            <element signature="e#2566#2581#0" expanded="true" />
+            <element signature="e#3488#3504#0" expanded="true" />
+            <element signature="e#5219#5235#0" expanded="true" />
+            <element signature="e#6294#6310#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1255,15 +1323,10 @@
           <caret line="101" column="0" lean-forward="false" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#3402#3410#0" expanded="true" />
-            <element signature="e#3957#3972#0" expanded="true" />
-            <element signature="e#4034#4049#0" expanded="true" />
-            <element signature="e#5948#5964#0" expanded="true" />
-            <element signature="e#7680#7696#0" expanded="true" />
-            <element signature="e#10121#10146#0" expanded="true" />
-            <element signature="e#10193#10456#0" expanded="true" />
-            <element signature="e#10455#10456#0" expanded="true" />
-            <element signature="e#10511#10526#0" expanded="true" />
+            <element signature="e#2566#2581#0" expanded="true" />
+            <element signature="e#3488#3504#0" expanded="true" />
+            <element signature="e#5219#5235#0" expanded="true" />
+            <element signature="e#6294#6310#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1335,15 +1398,10 @@
           <caret line="101" column="0" lean-forward="false" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#3402#3410#0" expanded="true" />
-            <element signature="e#3957#3972#0" expanded="true" />
-            <element signature="e#4034#4049#0" expanded="true" />
-            <element signature="e#5948#5964#0" expanded="true" />
-            <element signature="e#7680#7696#0" expanded="true" />
-            <element signature="e#10121#10146#0" expanded="true" />
-            <element signature="e#10193#10456#0" expanded="true" />
-            <element signature="e#10455#10456#0" expanded="true" />
-            <element signature="e#10511#10526#0" expanded="true" />
+            <element signature="e#2566#2581#0" expanded="true" />
+            <element signature="e#3488#3504#0" expanded="true" />
+            <element signature="e#5219#5235#0" expanded="true" />
+            <element signature="e#6294#6310#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1498,24 +1556,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="107" column="8" lean-forward="false" selection-start-line="107" selection-start-column="8" selection-end-line="107" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Indexer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="205">
-          <caret line="108" column="77" lean-forward="false" selection-start-line="108" selection-start-column="14" selection-end-line="108" selection-end-column="77" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/okapi_TF.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-90">
@@ -1575,59 +1615,168 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/okapiTF.java">
+    <entry file="file://$PROJECT_DIR$/oldresults/1/okapiTF.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="47" column="22" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="250" selection-end-column="0" />
+        <state relative-caret-position="0">
+          <caret line="0" column="6" lean-forward="false" selection-start-line="0" selection-start-column="6" selection-end-line="0" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Extra.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="143" column="115" lean-forward="true" selection-start-line="143" selection-start-column="115" selection-end-line="143" selection-end-column="115" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#3402#3410#0" expanded="true" />
-            <element signature="e#3957#3972#0" expanded="true" />
-            <element signature="e#4034#4049#0" expanded="true" />
-            <element signature="e#5948#5964#0" expanded="true" />
-            <element signature="e#7680#7696#0" expanded="true" />
-            <element signature="e#10121#10146#0" expanded="true" />
-            <element signature="e#10193#10456#0" expanded="true" />
-            <element signature="e#10455#10456#0" expanded="true" />
-            <element signature="e#10511#10526#0" expanded="true" />
+            <element signature="e#1145#1161#0" expanded="true" />
+            <element signature="e#3581#3596#0" expanded="true" />
+            <element signature="e#3654#3669#0" expanded="true" />
+            <element signature="e#4752#4768#0" expanded="true" />
+            <element signature="e#7811#7833#0" expanded="true" />
+            <element signature="e#7880#8132#0" expanded="true" />
+            <element signature="e#8131#8132#0" expanded="true" />
+            <element signature="e#8188#8203#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LSResults.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Laplace.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Laplace.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-825">
+          <caret line="146" column="38" lean-forward="true" selection-start-line="146" selection-start-column="38" selection-end-line="146" selection-end-column="39" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1676#1684#0" expanded="true" />
+            <element signature="e#1803#1956#0" expanded="true" />
+            <element signature="e#1955#1956#0" expanded="true" />
+            <element signature="e#4142#4158#0" expanded="true" />
+            <element signature="e#4881#4889#0" expanded="true" />
+            <element signature="e#5176#5191#0" expanded="true" />
+            <element signature="e#5249#5264#0" expanded="true" />
+            <element signature="e#5590#5605#0" expanded="true" />
+            <element signature="e#7705#7721#0" expanded="true" />
+            <element signature="e#10110#10126#0" expanded="true" />
+            <element signature="e#12887#12913#0" expanded="true" />
+            <element signature="e#12960#13224#0" expanded="true" />
+            <element signature="e#13223#13224#0" expanded="true" />
+            <element signature="e#13280#13295#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/Indexer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="96" column="13" lean-forward="true" selection-start-line="96" selection-start-column="13" selection-end-line="96" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oldresults/2/okapiTF.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/utility/JsonProcessing.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="3" lean-forward="true" selection-start-line="10" selection-start-column="3" selection-end-line="10" selection-end-column="3" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/utility/SortMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="55" lean-forward="false" selection-start-line="9" selection-start-column="41" selection-end-line="9" selection-end-column="55" />
+          <folding>
+            <element signature="e#334#360#0" expanded="true" />
+            <element signature="e#407#671#0" expanded="true" />
+            <element signature="e#670#671#0" expanded="true" />
+            <element signature="e#727#742#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/TF_IDF.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/utility/QueryProcessing.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="55" lean-forward="false" selection-start-line="13" selection-start-column="31" selection-end-line="13" selection-end-column="55" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1628#1636#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/okapiTF.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="372">
+          <caret line="185" column="5" lean-forward="true" selection-start-line="172" selection-start-column="4" selection-end-line="185" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2566#2581#0" expanded="true" />
+            <element signature="e#3488#3504#0" expanded="true" />
+            <element signature="e#5219#5235#0" expanded="true" />
+            <element signature="e#6294#6310#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/TF_IDF.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-615">
-          <caret line="55" column="54" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="250" selection-end-column="0" />
+        <state relative-caret-position="399">
+          <caret line="191" column="5" lean-forward="false" selection-start-line="177" selection-start-column="4" selection-end-line="191" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#3399#3407#0" expanded="true" />
-            <element signature="e#3954#3969#0" expanded="true" />
-            <element signature="e#4031#4046#0" expanded="true" />
-            <element signature="e#5945#5961#0" expanded="true" />
-            <element signature="e#7677#7693#0" expanded="true" />
-            <element signature="e#10209#10234#0" expanded="true" />
-            <element signature="e#10281#10544#0" expanded="true" />
-            <element signature="e#10543#10544#0" expanded="true" />
-            <element signature="e#10599#10614#0" expanded="true" />
+            <element signature="e#3468#3484#0" expanded="true" />
+            <element signature="e#5200#5216#0" expanded="true" />
+            <element signature="e#6403#6419#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/neu/ir/OkapiBM25.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="203" column="193" lean-forward="false" selection-start-line="203" selection-start-column="193" selection-end-line="203" selection-end-column="193" />
+        <state relative-caret-position="384">
+          <caret line="246" column="99" lean-forward="false" selection-start-line="246" selection-start-column="99" selection-end-line="246" selection-end-column="99" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#3501#3509#0" expanded="true" />
-            <element signature="e#4056#4071#0" expanded="true" />
-            <element signature="e#4133#4148#0" expanded="true" />
-            <element signature="e#6263#6279#0" expanded="true" />
-            <element signature="e#7995#8011#0" expanded="true" />
-            <element signature="e#10613#10638#0" expanded="true" />
-            <element signature="e#10685#10948#0" expanded="true" />
-            <element signature="e#10947#10948#0" expanded="true" />
-            <element signature="e#11003#11018#0" expanded="true" />
+            <element signature="e#4920#4936#0" expanded="true" />
+            <element signature="e#6652#6668#0" expanded="true" />
+            <element signature="e#8613#8629#0" expanded="true" />
           </folding>
         </state>
       </provider>
