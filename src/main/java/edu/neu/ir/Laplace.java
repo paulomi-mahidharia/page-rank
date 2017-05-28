@@ -200,7 +200,7 @@ public class Laplace {
 
                     System.out.println(stem);
 
-                    JsonArrayBuilder jarr = Json.createArrayBuilder();
+                    /*JsonArrayBuilder jarr = Json.createArrayBuilder();
 
                     jarr.add(Json.createObjectBuilder()
                             .add("match", Json.createObjectBuilder()
@@ -209,20 +209,23 @@ public class Laplace {
                             .add("match_phrase", Json.createObjectBuilder()
                                     .add("docNo", docName)));
 
-                        JsonArray array = jarr.build();
+                        JsonArray array = jarr.build();*/
+                    String term;
+                    if(stem.equals("")) term = word;
+                    else term = stem;
 
                     // Get TF for given word
                     JsonObject TFObject = Json.createObjectBuilder()
                             .add("size", 10000)
                             .add("_source", true)
                             .add("query", Json.createObjectBuilder()
-                                    .add("bool", Json.createObjectBuilder()
-                                        .add("must", array)))
+                                    .add("match_phrase", Json.createObjectBuilder()
+                                        .add("docNo", docName)))
                             .add("script_fields", Json.createObjectBuilder()
                                     .add("index_tf", Json.createObjectBuilder()
                                             .add("script", Json.createObjectBuilder()
                                                     .add("lang", "groovy")
-                                                    .add("inline", "_index['text']['" + stem + "'].tf()")))
+                                                    .add("inline", "_index['text']['" + term + "'].tf()")))
                                     .add("doc_length", Json.createObjectBuilder()
                                             .add("script", Json.createObjectBuilder()
                                                     .add("inline", "doc['text'].values.size()"))))
@@ -241,7 +244,7 @@ public class Laplace {
                     float LMTemp = (float) 0 ;
                     for (JsonNode hit : hits) {
 
-                        //System.out.println(hit.toString());
+                        System.out.println(hit.toString());
 
                         String TFWDRaw = hit.get("fields").get("index_tf").toString().replace("[", "").replace("]", "").trim();
                         int TFWD = TFWDRaw.equals("") ? 0 : Integer.parseInt(TFWDRaw);
@@ -263,7 +266,7 @@ public class Laplace {
                             LMTemp = (float) Math.log(term1);
                         }
 
-                        LM= LM + LMTemp;
+                        LM = LM + LMTemp;
                     }
 
                     LaplaceSmoothing.put(docName,

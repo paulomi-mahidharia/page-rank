@@ -30,4 +30,27 @@ public class SortMap {
         return (HashMap<String, Float>) aMap2;
     }
 
+    public static HashMap<String, Double> sortMapByScoreDouble(Map<String, Double> map) {
+
+        Set<Map.Entry<String, Double>> mapEntries = map.entrySet();
+        List<Map.Entry<String, Double>> aList = new LinkedList<Map.Entry<String, Double>>(mapEntries);
+
+        Collections.sort(aList, new Comparator<Map.Entry<String, Double>>() {
+
+
+            public int compare(Map.Entry<String, Double> ele1,
+                               Map.Entry<String, Double> ele2) {
+
+                return ele2.getValue().compareTo(ele1.getValue());
+            }
+        });
+
+        Map<String, Double> aMap2 = new LinkedHashMap<String, Double>();
+        for (Map.Entry<String, Double> entry : aList) {
+            aMap2.put(entry.getKey(), entry.getValue());
+        }
+
+        return (HashMap<String, Double>) aMap2;
+    }
+
 }

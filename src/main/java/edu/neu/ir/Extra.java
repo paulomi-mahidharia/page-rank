@@ -1,242 +1,237 @@
 package edu.neu.ir;
 
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.FileUtils;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.script.Script;
-import org.elasticsearch.script.ScriptType;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.util.EntityUtils;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
+import org.json.simple.parser.ParseException;
 
+import javax.json.Json;
+import javax.json.JsonObject;
 import java.io.*;
-import java.net.InetAddress;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static edu.neu.utility.JsonProcessing.parseStringToJson;
+import static edu.neu.utility.QueryProcessing.getStopWords;
+import static edu.neu.utility.QueryProcessing.removeStopWordsFromQuery;
+import static edu.neu.utility.SortMap.sortMapByScore;
+import static edu.neu.utility.SortMap.sortMapByScoreDouble;
 
 public class Extra {
-    public static void main(String[] args) throws IOException {
 
-        File IPfolder = new File("/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/ap89_collection");
-        File[] listOfFiles = IPfolder.listFiles();
-        Map<String, String> hmDocs = new HashMap<String, String>();
-
-        PrintWriter writer = new PrintWriter("LSResults.txt", "UTF-8");
-        Float Vocabulary = (float) 177992;
-
-
-        Settings settings = Settings.builder()
-                .put("cluster.name", "elasticsearch").build();
-
-        TransportClient client = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
-
-        BulkRequestBuilder br = client.prepareBulk();
-        int count = 0;
-
-        for (int i = 0; i < listOfFiles.length; i++) {
-//begin creating hash map
-            File mFile = new File(listOfFiles[i].getPath());
-            String str = FileUtils.readFileToString(mFile);
-            //  Extract DOC
-            Pattern pattern = Pattern.compile("<DOC>\\s(.+?)</DOC>", Pattern.DOTALL);
-            Matcher matcher = pattern.matcher(str);
-
-            while (matcher.find())
-
-            {
-                count++;
-                // Save DOC
-                String docTemp = matcher.group(1);
-
-                // Extract DOCNO
-
-                final Pattern pattern1 = Pattern.compile("<DOCNO>(.+?)</DOCNO>");
-                final Matcher matcher1 = pattern1.matcher(docTemp);
-                matcher1.find();
-                String docNoTemp1 = matcher1.group(1);
-                String docNoTemp = docNoTemp1.trim();
-                // System.out.println(docNoTemp);
-
-                // Extract TEXT
-
-
-                Pattern pattern2 = Pattern.compile("<TEXT>\\s(.+?)</TEXT>", Pattern.DOTALL);
-                Matcher matcher2 = pattern2.matcher(docTemp);
-
-                String textTemp = "";
-
-                while (matcher2.find()) {
-                    // System.out.println("TEXT");
-                    textTemp = textTemp.concat(matcher2.group(1));
-                    // textTemp = matcher2.group(1);
-                    // textTemp.concat(matcher2.group(1));
-                }
-                // System.out.println(textTemp);
-
-                // Create Hash Entry
-                textTemp = textTemp.replaceAll("\n", " ");
-
-                hmDocs.put(docNoTemp, textTemp);
-
-            }
-//end creating hash map
-        }
-
-        File QueryFile = new File("/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt");
-
-        BufferedReader br1 = new BufferedReader(new FileReader(QueryFile));
-
-        HashMap<String, Float> LaplaceSmoothing = new HashMap<String, Float>();
-        HashMap<String, Float> SortedMap = new HashMap<String, Float>();
-        String FullQueryTemp = "";
-        while ((FullQueryTemp = br1.readLine()) != null) {
-            if (FullQueryTemp.length() <= 3)
-                break;
-
-
-            String queryNo = FullQueryTemp.substring(0, 3);
-            queryNo = queryNo.replace(".", "");
-            queryNo = queryNo.trim();
-
-            System.out.println("QUERY : "+queryNo);
-
-
-            String[] queryparams = FullQueryTemp.substring(5, FullQueryTemp.length()).split("\\s+");
-// 	 for(String WordQueryTemp: queryparams)
-// 	 {
-// 		 System.out.println(WordQueryTemp);
-// 	 }
-
-
-            for (Map.Entry m : hmDocs.entrySet())
-
-            {
-                Double LM = 0.0;
-                String key = (String) m.getKey();
-
-                for (String WordQueryTemp : queryparams) {
-                    WordQueryTemp = WordQueryTemp.replace(".", " ");
-                    WordQueryTemp = WordQueryTemp.trim();
-                    // 	 System.out.println(WordQueryTemp);
-                    // 	 System.out.println(key);
-
-                    final Map<String, Object> params = new HashMap<String, Object>();
-                    params.put("term", WordQueryTemp);
-                    params.put("field", "text");
-
-                    SearchResponse response = client.prepareSearch("ap_dataset")
-                            .setTypes("document")
-                            .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                            .setQuery(QueryBuilders.termQuery("docno", key))
-                            .setFrom(0)
-                            .setSize(3)
-                            .addScriptField("getDOCLENGTH", (new Script("doc['text'].values.size()")))
-                            .addScriptField("getTF", (new Script(ScriptType.INLINE, "groovy", "_index['text']['govern'].tf()", params)))
-                            .get();
-
-                    //   System.out.println("res");
-
-                    String DocID = "";
-                    Float LMTemp = (float) 0;
-                    for (SearchHit hit : response.getHits().hits()) {
-                        DocID = hit.getId();
-                        //	 System.out.println(DocID);
-                        Integer TFWD = (hit.getFields().get("getTF").getValue());
-                        Integer lenD = (hit.getFields().get("getDOCLENGTH").getValue());
-                        //	System.out.println(TFWD);
-                        if (TFWD > 0) {
-                            Float term1 = (float) ((TFWD + 1) / (lenD + Vocabulary));
-
-                            LMTemp = (float) Math.log(term1);
-                            //  System.out.println(term1);
-
-//                      LM= LM + LMTemp;
-                            //  System.out.println(LM);
-
-                        } else {
-                            Float term1 = (float) ((0 + 1) / (lenD + Vocabulary));
-
-                            LMTemp = (float) Math.log(term1);
-                            // System.out.println(term1);
-
-
-                            //  System.out.println(LM);
-                        }
-
-
-                        LM = LM + LMTemp;
-
-
-                    }
-
-                    LaplaceSmoothing.put(key,
-                            (float) (LaplaceSmoothing.get(key) == null ? LM : LaplaceSmoothing.get(key) + LM));
-
-
-                    //   System.out.println(LM);
-
-
-                }
-
-            }
-
-
-            SortedMap = sortHM(LaplaceSmoothing);
-            LaplaceSmoothing.clear();
-            int rank = 0;
-
-            for (Map.Entry sm : SortedMap.entrySet()) {
-
-                if ((rank < 1000))
-
-                {
-                    rank = rank + 1;
-                    writer.println(queryNo + "  Q0  " + sm.getKey() + "  " + rank + "  " + sm.getValue() + "  LAPLACE  ");
-                } else break;
-
-            }
-
-
-            LaplaceSmoothing.clear();
-            SortedMap.clear();
-        }
-
-        writer.close();
-        System.out.println("DONE");
-    }
-
-    private static HashMap<String, Float> sortHM(Map<String, Float> aMap) {
-
-        Set<Entry<String, Float>> mapEntries = aMap.entrySet();
-        List<Entry<String, Float>> aList = new LinkedList<Entry<String, Float>>(mapEntries);
-
-        Collections.sort(aList, new Comparator<Entry<String, Float>>() {
-
-
-            public int compare(Entry<String, Float> ele1,
-                               Entry<String, Float> ele2) {
-
-                return ele2.getValue().compareTo(ele1.getValue());
+    private final static String HOST = "localhost";
+    private final static int PORT = 9200;
+    private final static String SCHEME = "http";
+    private final static String OUTPUT = "Laplace.txt";
+    private final static String DATA_DIR = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/ap89_collection";
+    private final static String DOC_PATTERN = "<DOC>\\s(.+?)</DOC>";
+    private final static String DOCNO_PATTERN = "<DOCNO>(.+?)</DOCNO>";
+    private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
+
+
+    public static void main(String args[]) throws IOException, ParseException {
+
+        File output = new File(OUTPUT);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+
+        /**
+         * Get all Document ids
+         */
+        List<String> docNames = new ArrayList<String>();
+        File dir = new File(DATA_DIR);
+
+        // Get list of relevant files
+        File[] files = dir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.startsWith("ap89");
             }
         });
 
-        Map<String, Float> aMap2 = new LinkedHashMap<String, Float>();
-        for (Entry<String, Float> entry : aList) {
-            aMap2.put(entry.getKey(), entry.getValue());
+        for (File file: files) {
+
+            // Read file as a String
+            File mFile = new File(file.getPath());
+            String str = FileUtils.readFileToString(mFile);
+
+            // Extract DOC
+            Pattern DOCpattern = Pattern.compile(DOC_PATTERN, Pattern.DOTALL);
+            Matcher DOCmatcher = DOCpattern.matcher(str);
+
+            while (DOCmatcher.find()) {
+
+                // Save DOC
+                String doc = DOCmatcher.group(1);
+
+                // Extract DOCNO
+                final Pattern DOCNOPattern = Pattern.compile(DOCNO_PATTERN);
+                final Matcher DOCNOMAtcher = DOCNOPattern.matcher(doc);
+
+                //String docNo = "";
+                if(DOCNOMAtcher.find()) {
+                    String docNo = DOCNOMAtcher.group(1).trim();
+                    docNames.add(docNo);
+                }
+
+            }
         }
 
-        return (HashMap<String, Float>) aMap2;
+        Map<String, Map<String, TermTFBean>> docTermTFMap = new HashMap<String, Map<String, TermTFBean>>();
+
+
+        RestClient restClient = RestClient.builder(
+                new HttpHost(HOST, PORT, SCHEME),
+                new HttpHost(HOST, PORT + 1, SCHEME)).build();
+
+        System.out.println("NUMBER OF DOCS : "+docNames.size());
+        int docCount = docNames.size();
+
+        for(String docID : docNames){
+
+            //System.out.println("DOC : "+docID);
+            Map<String, TermTFBean> termTFBeanMap = new HashMap<String, TermTFBean>();
+
+            //Get Doc length
+            JsonObject vocabularyObj = Json.createObjectBuilder()
+                    .add("query", Json.createObjectBuilder()
+                        .add("match_phrase", Json.createObjectBuilder()
+                            .add("docNo", docID)))
+                    .add("script_fields", Json.createObjectBuilder()
+                            .add("doc_length", Json.createObjectBuilder()
+                                    .add("script", Json.createObjectBuilder()
+                                            .add("inline", "doc['text'].values.size()"))))
+                    .build();
+
+            HttpEntity docLengthEntity = new NStringEntity(vocabularyObj.toString(), ContentType.APPLICATION_JSON);
+            Response docLengthResponse = restClient.performRequest("GET", "/ap89_dataset/_search/", Collections.<String, String>emptyMap(), docLengthEntity);
+            ObjectNode docLengthObject = parseStringToJson(EntityUtils.toString(docLengthResponse.getEntity()));
+            JsonNode hits = docLengthObject.get("hits").get("hits");
+            int docLength = 0;
+            for(JsonNode hit: hits){
+                docLength = Integer.parseInt(hit.get("fields").get("doc_length").toString().replace("[", "").replace("]", "").trim());
+            }
+
+            //Get doc TFs
+            Response termVectorResponse = restClient.performRequest("GET", "/ap89_dataset/document/"+docID+"/_termvector");
+            ObjectNode termVectorResponseJson = parseStringToJson(EntityUtils.toString(termVectorResponse.getEntity()));
+
+            JsonNode docTermVector = termVectorResponseJson.get("term_vectors");
+            if(docTermVector.toString().equals("{}")) {
+                docTermTFMap.put(docID, termTFBeanMap);
+                continue;
+            }
+            JsonNode terms = termVectorResponseJson.get("term_vectors").get("text").get("terms");
+            //System.out.println("TEMRS " + terms.toString());
+            Iterator<Map.Entry<String, JsonNode>> nodeIterator =  terms.fields();
+
+            while (nodeIterator.hasNext()) {
+
+                Map.Entry<String, JsonNode> entry = nodeIterator.next();
+                termTFBeanMap.put(entry.getKey(), new TermTFBean(docLength, entry.getValue().get("term_freq").asInt()));
+            }
+
+            docTermTFMap.put(docID, termTFBeanMap);
+        }
+
+        System.out.println(docTermTFMap.size());
+
+        /*JsonObject vocabularyObj = Json.createObjectBuilder()
+                .add("size", 0)
+                .add("aggs", Json.createObjectBuilder()
+                        .add("unique_terms", Json.createObjectBuilder()
+                                .add("cardinality", Json.createObjectBuilder()
+                                        .add("script", "doc['text'].values"))))
+                .build();
+
+        HttpEntity vocabularyEntity = new NStringEntity(vocabularyObj.toString(), ContentType.APPLICATION_JSON);
+        Response vocabularyResponse = restClient.performRequest("GET", "/ap89_dataset/document/_search/", Collections.<String, String>emptyMap(), vocabularyEntity);
+        ObjectNode vocabularyObject = parseStringToJson(EntityUtils.toString(vocabularyResponse.getEntity()));
+        int vocabulary = vocabularyObject.get("aggregations").get("unique_terms").get("value").asInt();*/
+
+        int vocabulary = 177992;
+        System.out.println("VOCAB : " + vocabulary);
+
+        // Read and store StopList terms
+        Set<String> stopWords = getStopWords();
+
+        File queryFile = new File(QUERY_FILE);
+        BufferedReader br = new BufferedReader(new FileReader(queryFile));
+        String query = null;
+        while ((query = br.readLine()) != null) {
+
+            HashMap<String, Double> LaplaceSmoothing = new HashMap<String, Double>();
+            HashMap<String, Double> SortedMap = new HashMap<String, Double>();
+
+            //for each query
+            if (query.length() <= 3) {
+                break;
+            }
+
+            String queryNo = query.substring(0, 3).replace(".", "").trim();
+            System.out.println("QUERY NO : " + queryNo);
+
+            query = query.substring(5).trim();
+
+            StringBuffer cleanQuery = removeStopWordsFromQuery(query, stopWords);
+            String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
+
+            for(String word : cleanQueryWords) {
+
+
+                for(String key: docTermTFMap.keySet()){
+
+                    //Get Doc Length
+
+                    double LMTemp;
+                    Map<String, TermTFBean> termTFMap = docTermTFMap.get(key);
+                    if(termTFMap.size() <= 0) continue;
+
+                    if(termTFMap.containsKey(word)){
+
+                        System.out.println("TERM : "+word+" TF: "+termTFMap.get(word).getTf() + "DOC LENGTH :"+termTFMap.get(word).getDocLength() + "VOCAB : "+vocabulary);
+
+                        Double term1 = (double) ((termTFMap.get(word).getTf()+1)/(termTFMap.get(word).getDocLength()+vocabulary));
+                        LMTemp = Math.log(term1);
+                    }else{
+
+                        System.out.println("TERM : "+word + "DOC LENGTH :"+termTFMap.get(word).getDocLength() + "VOCAB : "+vocabulary);
+
+                        Double term1 = (double) (1/(termTFMap.entrySet().iterator().next().getValue().getDocLength()+vocabulary));
+                        LMTemp = Math.log(term1);
+                    }
+
+                    System.out.println("LMTemp" + LMTemp);
+
+                    LaplaceSmoothing.put(key,
+                             (LaplaceSmoothing.get(key) == null ? LMTemp : LaplaceSmoothing.get(key) + LMTemp));
+
+                }
+            }
+
+            System.out.println("SIZE : " + LaplaceSmoothing.size());
+            SortedMap = sortMapByScoreDouble(LaplaceSmoothing);
+            System.out.println("SORTED SIZE : " + SortedMap.size());
+            int rank = 0;
+
+            for (Map.Entry m1 : SortedMap.entrySet()) {
+
+                if (rank < 1000) {
+                    rank = rank + 1;
+                    writer.write(queryNo + " Q0 " + m1.getKey() + " " + rank + " " + m1.getValue() + " Laplace\n");
+                } else
+                    break;
+            }
+            SortedMap.clear();
+            LaplaceSmoothing.clear();
+        }
+        writer.close();
+        br.close();
     }
 }
-
-
