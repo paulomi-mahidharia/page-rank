@@ -25,19 +25,21 @@ import static edu.neu.utility.QueryProcessing.getStopWords;
 import static edu.neu.utility.QueryProcessing.removeStopWordsFromQuery;
 import static edu.neu.utility.SortMap.sortMapByScoreDouble;
 
-public class LaplaceSmoothing {
+/**
+ * Created by paulomimahidharia on 5/28/17.
+ */
+public class JMSmoothing {
 
     private final static String HOST = "localhost";
     private final static int PORT = 9200;
     private final static String SCHEME = "http";
-    private final static String OUTPUT = "Laplace.txt";
+    private final static String OUTPUT = "JMSmoothing.txt";
     private final static String DATA_DIR = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/ap89_collection";
     private final static String DOC_PATTERN = "<DOC>\\s(.+?)</DOC>";
     private final static String DOCNO_PATTERN = "<DOCNO>(.+?)</DOCNO>";
     private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
 
-
-    public static void main(String args[]) throws IOException, ParseException {
+    public static void main(String[] args) throws IOException, ParseException {
 
         File output = new File(OUTPUT);
         BufferedWriter writer = new BufferedWriter(new FileWriter(output));
@@ -93,6 +95,7 @@ public class LaplaceSmoothing {
         System.out.println("NUMBER OF DOCS : "+docNames.size());
         int docCount = docNames.size();
 
+        long sum_doc_freq = 13944841;
         for(String docID : docNames){
 
             //System.out.println("DOC : "+docID);
@@ -101,8 +104,8 @@ public class LaplaceSmoothing {
             //Get Doc length
             JsonObject vocabularyObj = Json.createObjectBuilder()
                     .add("query", Json.createObjectBuilder()
-                        .add("match_phrase", Json.createObjectBuilder()
-                            .add("docNo", docID)))
+                            .add("match_phrase", Json.createObjectBuilder()
+                                    .add("docNo", docID)))
                     .add("script_fields", Json.createObjectBuilder()
                             .add("doc_length", Json.createObjectBuilder()
                                     .add("script", Json.createObjectBuilder()
@@ -112,8 +115,11 @@ public class LaplaceSmoothing {
             HttpEntity docLengthEntity = new NStringEntity(vocabularyObj.toString(), ContentType.APPLICATION_JSON);
             Response docLengthResponse = restClient.performRequest("GET", "/ap89_dataset/_search/", Collections.<String, String>emptyMap(), docLengthEntity);
             ObjectNode docLengthObject = parseStringToJson(EntityUtils.toString(docLengthResponse.getEntity()));
+
+
             JsonNode hits = docLengthObject.get("hits").get("hits");
             int docLength = 0;
+
             for(JsonNode hit: hits){
                 docLength = Integer.parseInt(hit.get("fields").get("doc_length").toString().replace("[", "").replace("]", "").trim());
             }
@@ -122,14 +128,15 @@ public class LaplaceSmoothing {
             Response termVectorResponse = restClient.performRequest("GET", "/ap89_dataset/document/"+docID+"/_termvector");
             ObjectNode termVectorResponseJson = parseStringToJson(EntityUtils.toString(termVectorResponse.getEntity()));
 
+
             JsonNode docTermVector = termVectorResponseJson.get("term_vectors");
             if(docTermVector.toString().equals("{}")) {
                 docTermTFMap.put(docID, termTFBeanMap);
-                System.out.println("DOC DOC : "+docID);
+                //System.out.println("DOC DOC : "+docID);
                 continue;
             }
+
             JsonNode terms = termVectorResponseJson.get("term_vectors").get("text").get("terms");
-            //System.out.println("TEMRS " + terms.toString());
             Iterator<Map.Entry<String, JsonNode>> nodeIterator =  terms.fields();
 
             while (nodeIterator.hasNext()) {
@@ -143,22 +150,6 @@ public class LaplaceSmoothing {
 
         System.out.println(docTermTFMap.size());
 
-        /*JsonObject vocabularyObj = Json.createObjectBuilder()
-                .add("size", 0)
-                .add("aggs", Json.createObjectBuilder()
-                        .add("unique_terms", Json.createObjectBuilder()
-                                .add("cardinality", Json.createObjectBuilder()
-                                        .add("script", "doc['text'].values"))))
-                .build();
-
-        HttpEntity vocabularyEntity = new NStringEntity(vocabularyObj.toString(), ContentType.APPLICATION_JSON);
-        Response vocabularyResponse = restClient.performRequest("GET", "/ap89_dataset/document/_search/", Collections.<String, String>emptyMap(), vocabularyEntity);
-        ObjectNode vocabularyObject = parseStringToJson(EntityUtils.toString(vocabularyResponse.getEntity()));
-        int vocabulary = vocabularyObject.get("aggregations").get("unique_terms").get("value").asInt();*/
-
-        int vocabulary = 177992;
-        System.out.println("VOCAB : " + vocabulary);
-
         // Read and store StopList terms
         Set<String> stopWords = getStopWords();
 
@@ -167,8 +158,8 @@ public class LaplaceSmoothing {
         String query = null;
         while ((query = br.readLine()) != null) {
 
-            HashMap<String, Double> LaplaceSmoothing = new HashMap<String, Double>();
-            HashMap<String, Double> SortedMap = new HashMap<String, Double>();
+            HashMap<String, Double> JMSmoothingMap = new HashMap<String, Double>();
+            HashMap<String, Double> SortedMap;
 
             //for each query
             if (query.length() <= 3) {
@@ -184,6 +175,22 @@ public class LaplaceSmoothing {
             String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
 
             for(String word : cleanQueryWords) {
+
+
+                //Get max_score
+                JsonObject maxScoreObject = Json.createObjectBuilder()
+                        .add("size", 1)
+                        .add("_source", true)
+                        .add("query", Json.createObjectBuilder()
+                                .add("match", Json.createObjectBuilder()
+                                        .add("text", word)))
+                        .build();
+                HttpEntity maxScoreEntity = new NStringEntity(maxScoreObject.toString(), ContentType.APPLICATION_JSON);
+                Response maxScoreResponse = restClient.performRequest("GET", "/ap89_dataset/_search/", Collections.<String, String>emptyMap(), maxScoreEntity);
+                ObjectNode maxScoreNode = parseStringToJson(EntityUtils.toString(maxScoreResponse.getEntity()));
+
+
+                long maxScore = maxScoreNode.get("hits").get("max_score").asLong();
 
                 // Get stem for current word
                 JsonObject stemObj = Json.createObjectBuilder()
@@ -211,41 +218,36 @@ public class LaplaceSmoothing {
                     Map<String, TermTFBean> termTFMap = docTermTFMap.get(key);
                     if(termTFMap.size() <= 0) {
 
-                        Double term1 = ((1.0)/(0.0 +vocabulary));
-                        LMTemp = Math.log(term1);
+                        double term1 = ( 0 + (0.4 * (maxScore) / (sum_doc_freq)));
+                        double JM =  (Math.log(term1));
 
-                        LaplaceSmoothing.put(key,
-                                (LaplaceSmoothing.get(key) == null ? LMTemp : LaplaceSmoothing.get(key) + LMTemp));
+                        JMSmoothingMap.put(key,
+                                (JMSmoothingMap.get(key) == null ? JM : JMSmoothingMap.get(key) + JM));
                         continue;
                     }
 
                     Double docLength = (double) termTFMap.entrySet().iterator().next().getValue().getDocLength();
-
+                    Double TFWD;
                     if(termTFMap.containsKey(term)){
 
-                        Double TF = (double) termTFMap.get(term).getTf()+1;
-                        //System.out.println("TERM : "+word+" TF: "+termTFMap.get(word).getTf() + "DOC LENGTH :"+termTFMap.get(word).getDocLength() + "VOCAB : "+vocabulary);
+                        TFWD = (double) termTFMap.get(term).getTf()+1;
 
-                        Double term1 = ((TF+1)/(docLength +vocabulary));
-                        LMTemp = Math.log(term1);
                     }else{
+                        TFWD = (double) 0;
 
-                        //System.out.println("TERM : "+word + "DOC LENGTH :"+termTFMap.entrySet().iterator().next().getValue().getDocLength() + "VOCAB : "+vocabulary);
-
-                        Double term1 = (1/(docLength+vocabulary));
-                        LMTemp = Math.log(term1);
                     }
 
-                    //System.out.println("LMTemp" + LMTemp);
+                    double term1 = ((0.6 * TFWD / docLength) + (0.4 * (maxScore - TFWD) / (sum_doc_freq - docLength)));
+                    double JM =  (Math.log(term1));
 
-                    LaplaceSmoothing.put(key,
-                             (LaplaceSmoothing.get(key) == null ? LMTemp : LaplaceSmoothing.get(key) + LMTemp));
+                    JMSmoothingMap.put(key,
+                            (JMSmoothingMap.get(key) == null ? JM : JMSmoothingMap.get(key) + JM));
 
                 }
             }
 
-            System.out.println("SIZE : " + LaplaceSmoothing.size());
-            SortedMap = sortMapByScoreDouble(LaplaceSmoothing);
+            System.out.println("SIZE : " + JMSmoothingMap.size());
+            SortedMap = sortMapByScoreDouble(JMSmoothingMap);
             System.out.println("SORTED SIZE : " + SortedMap.size());
             int rank = 0;
 
@@ -253,16 +255,17 @@ public class LaplaceSmoothing {
 
                 if (rank < 1000) {
                     rank = rank + 1;
-                    writer.write(queryNo + " Q0 " + m1.getKey() + " " + rank + " " + m1.getValue() + " Laplace\n");
+                    writer.write(queryNo + " Q0 " + m1.getKey() + " " + rank + " " + m1.getValue() + " JM\n");
                 } else
                     break;
             }
             SortedMap.clear();
-            LaplaceSmoothing.clear();
+            JMSmoothingMap.clear();
         }
         writer.close();
         br.close();
 
         System.out.println("DONE");
+
     }
 }

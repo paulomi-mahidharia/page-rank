@@ -1,4 +1,4 @@
-package edu.neu.ir;
+package edu.neu.beans;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
