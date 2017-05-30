@@ -3,21 +3,29 @@ package edu.neu.beans;
 /**
  * Created by paulomimahidharia on 5/28/17.
  */
-public class TermTFBean {
+public class TermInfoBean {
 
     private int docLength;
     private int tf;
+    private int ttf;
+
     private double maxScore;
 
-    public TermTFBean(int term, int tf) {
+    public TermInfoBean(int term, int tf) {
         this.docLength = term;
         this.tf = tf;
-
     }
 
-    public TermTFBean(int term, int tf, double maxScore) {
+    public TermInfoBean(int term, int tf, int ttf) {
         this.docLength = term;
         this.tf = tf;
+        this.ttf = ttf;
+    }
+
+    public TermInfoBean(int term, int tf, int ttf, double maxScore) {
+        this.docLength = term;
+        this.tf = tf;
+        this.ttf = ttf;
         this.maxScore = maxScore;
 
     }
@@ -46,5 +54,13 @@ public class TermTFBean {
 
     public void setMaxScore(double maxScore) {
         this.maxScore = maxScore;
+    }
+
+    public int getTtf() {
+        return ttf;
+    }
+
+    public void setTtf(int ttf) {
+        this.ttf = ttf;
     }
 }

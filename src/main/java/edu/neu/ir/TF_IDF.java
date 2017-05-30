@@ -1,7 +1,6 @@
 package edu.neu.ir;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -15,7 +14,10 @@ import org.json.simple.parser.ParseException;
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static edu.neu.utility.JsonProcessing.parseStringToJson;
 import static edu.neu.utility.QueryProcessing.getStopWords;
@@ -30,9 +32,11 @@ public class TF_IDF {
     private final static String HOST = "localhost";
     private final static int PORT = 9200;
     private final static String SCHEME = "http";
-    private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
-    private static long DOCCount = 0;
+
     private final static String OUTPUT = "TF_IDF.txt";
+    private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
+
+    private static long DOCCount = 0;
     private static HashMap<String, Float> TFIDFMap = null;
 
     public static void main(String args[]) throws IOException, ParseException {
@@ -56,9 +60,9 @@ public class TF_IDF {
         Set<String> stopWords = getStopWords();
         System.out.println(stopWords.size());
 
-        BufferedReader br = new BufferedReader(new FileReader(queryFile));
+        BufferedReader reader = new BufferedReader(new FileReader(queryFile));
         String query;
-        while ((query = br.readLine()) != null) {
+        while ((query = reader.readLine()) != null) {
 
             //for each query
             if (query.length() <= 3) {
@@ -77,6 +81,8 @@ public class TF_IDF {
             String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
             for (String word : cleanQueryWords) {
 
+                word = word.trim();
+
                 // Get stem for current word
                 JsonObject stemObj = Json.createObjectBuilder()
                         .add("analyzer", "my_english")
@@ -90,10 +96,8 @@ public class TF_IDF {
                 String stem = "";
 
                 for (JsonNode tokenObj : stemResponse.get("tokens")) {
-                    stem = tokenObj.get("token").asText().replace("\"", "").replace("\'", "\\'");
+                    stem = tokenObj.get("token").asText().replace("\"", "").replace("\'", "\\'").trim();
                 }
-
-                System.out.println(stem);
 
                 // Get TF for given word
                 JsonObject TFObject = Json.createObjectBuilder()
@@ -119,7 +123,7 @@ public class TF_IDF {
 
                 JsonNode hits = TFJSON.get("hits").get("hits");
                 long numberOfHits = TFJSON.get("hits").get("total").asLong();
-                System.out.println("HITS : "+numberOfHits);
+                System.out.println("HITS : " + numberOfHits);
 
                 for (JsonNode hit : hits) {
 
@@ -132,7 +136,7 @@ public class TF_IDF {
                 if (totalHits > 10000) {
 
                     scrollId = TFJSON.get("_scroll_id").asText();
-                    while(totalHits > 10000){
+                    while (totalHits > 10000) {
 
                         JsonObject TFIDFScrollObject = Json.createObjectBuilder()
                                 .add("scroll", "1m")
@@ -172,10 +176,10 @@ public class TF_IDF {
         }
         writer.close();
         restClient.close();
-        br.close();
+        reader.close();
     }
 
-    private static void updateMap(JsonNode hit, double docAverage, long numberOfHits){
+    private static void updateMap(JsonNode hit, double docAverage, long numberOfHits) {
 
         String TFWDRaw = hit.get("fields").get("index_tf").toString().replace("[", "").replace("]", "").trim();
         int TFWD = TFWDRaw.equals("") ? 0 : Integer.parseInt(TFWDRaw);

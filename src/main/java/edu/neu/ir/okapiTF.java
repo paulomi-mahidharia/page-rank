@@ -14,7 +14,10 @@ import org.json.simple.parser.ParseException;
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static edu.neu.utility.JsonProcessing.parseStringToJson;
 import static edu.neu.utility.QueryProcessing.getStopWords;
@@ -29,9 +32,10 @@ public class okapiTF {
     private final static String HOST = "localhost";
     private final static int PORT = 9200;
     private final static String SCHEME = "http";
-    private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
-    private static long DOCCount = 0;
+
     private final static String OUTPUT = "okapiTF.txt";
+    private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
+
     private static HashMap<String, Float> okapiTFMAP = null;
 
     public static void main(String args[]) throws IOException, ParseException {
@@ -43,10 +47,6 @@ public class okapiTF {
                 new HttpHost(HOST, PORT, SCHEME),
                 new HttpHost(HOST, PORT + 1, SCHEME)).build();
 
-        Response countResponse = restClient.performRequest("GET", "/ap_dataset/document/_count");
-        ObjectNode countJson = parseStringToJson(EntityUtils.toString(countResponse.getEntity()));
-        DOCCount = Long.parseLong(countJson.get("count").toString());
-
         double docAverage = (double) 20976545 / 84612;
         BufferedWriter writer = new BufferedWriter(new FileWriter(okapiTFOutput));
 
@@ -54,9 +54,9 @@ public class okapiTF {
         Set<String> stopWords = getStopWords();
         System.out.println(stopWords.size());
 
-        BufferedReader br = new BufferedReader(new FileReader(queryFile));
+        BufferedReader reader = new BufferedReader(new FileReader(queryFile));
         String query = null;
-        while ((query = br.readLine()) != null) {
+        while ((query = reader.readLine()) != null) {
 
             //for each query
             if (query.length() <= 3) {
@@ -64,7 +64,7 @@ public class okapiTF {
             }
 
             okapiTFMAP = new HashMap<String, Float>();
-            HashMap<String, Float> SortedMap = new HashMap<String, Float>();
+            HashMap<String, Float> SortedMap;
 
             String queryNo = query.substring(0, 3).replace(".", "").trim();
             query = query.substring(5).trim();
@@ -75,6 +75,8 @@ public class okapiTF {
             //Get each word in the query
             String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
             for (String word : cleanQueryWords) {
+
+                word = word.trim();
 
                 // Get stem for current word
                 JsonObject stemObj = Json.createObjectBuilder()
@@ -89,10 +91,8 @@ public class okapiTF {
                 String stem = "";
 
                 for (JsonNode tokenObj : stemResponse.get("tokens")) {
-                    stem = tokenObj.get("token").asText().replace("\"", "").replace("\'", "\\'");
+                    stem = tokenObj.get("token").asText().replace("\"", "").replace("\'", "\\'").trim();
                 }
-
-                System.out.println(stem);
 
                 // Get TF for given word
                 JsonObject TFObject = Json.createObjectBuilder()
@@ -128,7 +128,7 @@ public class okapiTF {
 
                     scrollId = TFJSON.get("_scroll_id").asText();
 
-                    while(numberOfHits > 10000){
+                    while (numberOfHits > 10000) {
 
                         JsonObject TFScrollObject = Json.createObjectBuilder()
                                 .add("scroll", "1m")
@@ -167,10 +167,10 @@ public class okapiTF {
         }
         writer.close();
         restClient.close();
-        br.close();
+        reader.close();
     }
 
-    private static void updateMap(JsonNode hit, double docAverage){
+    private static void updateMap(JsonNode hit, double docAverage) {
 
         String TFWDRaw = hit.get("fields").get("index_tf").toString().replace("[", "").replace("]", "").trim();
         int TFWD = TFWDRaw.equals("") ? 0 : Integer.parseInt(TFWDRaw);

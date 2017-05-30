@@ -2,8 +2,7 @@ package edu.neu.ir;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import edu.neu.beans.TermTFBean;
-import org.apache.commons.io.FileUtils;
+import edu.neu.beans.TermInfoBean;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
@@ -17,9 +16,8 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import static edu.neu.utility.FileParser.getDocIds;
 import static edu.neu.utility.JsonProcessing.parseStringToJson;
 import static edu.neu.utility.QueryProcessing.getStopWords;
 import static edu.neu.utility.QueryProcessing.removeStopWordsFromQuery;
@@ -33,73 +31,34 @@ public class JMSmoothing {
     private final static String HOST = "localhost";
     private final static int PORT = 9200;
     private final static String SCHEME = "http";
+
     private final static String OUTPUT = "JMSmoothing.txt";
-    private final static String DATA_DIR = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/ap89_collection";
-    private final static String DOC_PATTERN = "<DOC>\\s(.+?)</DOC>";
-    private final static String DOCNO_PATTERN = "<DOCNO>(.+?)</DOCNO>";
     private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
 
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String args[]) throws IOException, ParseException {
+
+        int vocabulary = 177992;
+
+        File queryFile = new File(QUERY_FILE);
+        BufferedReader reader = new BufferedReader(new FileReader(queryFile));
 
         File output = new File(OUTPUT);
         BufferedWriter writer = new BufferedWriter(new FileWriter(output));
-
-        /**
-         * Get all Document ids
-         */
-        List<String> docNames = new ArrayList<String>();
-        File dir = new File(DATA_DIR);
-
-        // Get list of relevant files
-        File[] files = dir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith("ap89");
-            }
-        });
-
-        for (File file: files) {
-
-            // Read file as a String
-            File mFile = new File(file.getPath());
-            String str = FileUtils.readFileToString(mFile);
-
-            // Extract DOC
-            Pattern DOCpattern = Pattern.compile(DOC_PATTERN, Pattern.DOTALL);
-            Matcher DOCmatcher = DOCpattern.matcher(str);
-
-            while (DOCmatcher.find()) {
-
-                // Save DOC
-                String doc = DOCmatcher.group(1);
-
-                // Extract DOCNO
-                final Pattern DOCNOPattern = Pattern.compile(DOCNO_PATTERN);
-                final Matcher DOCNOMAtcher = DOCNOPattern.matcher(doc);
-
-                //String docNo = "";
-                if(DOCNOMAtcher.find()) {
-                    String docNo = DOCNOMAtcher.group(1).trim();
-                    docNames.add(docNo);
-                }
-
-            }
-        }
-
-        Map<String, Map<String, TermTFBean>> docTermTFMap = new HashMap<String, Map<String, TermTFBean>>();
-
 
         RestClient restClient = RestClient.builder(
                 new HttpHost(HOST, PORT, SCHEME),
                 new HttpHost(HOST, PORT + 1, SCHEME)).build();
 
-        System.out.println("NUMBER OF DOCS : "+docNames.size());
-        int docCount = docNames.size();
+        /**
+         * Get all Document ids
+         */
+        List<String> docNames = getDocIds();
 
-        long sum_doc_freq = 13944841;
-        for(String docID : docNames){
+        Map<String, Map<String, TermInfoBean>> docTermTFMap = new HashMap<String, Map<String, TermInfoBean>>();
 
-            //System.out.println("DOC : "+docID);
-            Map<String, TermTFBean> termTFBeanMap = new HashMap<String, TermTFBean>();
+        for (String docID : docNames) {
+
+            Map<String, TermInfoBean> termTFBeanMap = new HashMap<String, TermInfoBean>();
 
             //Get Doc length
             JsonObject vocabularyObj = Json.createObjectBuilder()
@@ -120,29 +79,34 @@ public class JMSmoothing {
             JsonNode hits = docLengthObject.get("hits").get("hits");
             int docLength = 0;
 
-            for(JsonNode hit: hits){
+            for (JsonNode hit : hits) {
                 docLength = Integer.parseInt(hit.get("fields").get("doc_length").toString().replace("[", "").replace("]", "").trim());
             }
 
-            //Get doc TFs
-            Response termVectorResponse = restClient.performRequest("GET", "/ap89_dataset/document/"+docID+"/_termvector");
+            //Get doc TFs and TTFs
+            JsonObject termStats = Json.createObjectBuilder()
+                    .add("term_statistics", true)
+                    .build();
+            HttpEntity termStatsEntity = new NStringEntity(termStats.toString(), ContentType.APPLICATION_JSON);
+
+            Response termVectorResponse = restClient.performRequest("GET", "/ap89_dataset/document/" + docID + "/_termvector", Collections.<String, String>emptyMap(), termStatsEntity);
             ObjectNode termVectorResponseJson = parseStringToJson(EntityUtils.toString(termVectorResponse.getEntity()));
 
-
             JsonNode docTermVector = termVectorResponseJson.get("term_vectors");
-            if(docTermVector.toString().equals("{}")) {
-                docTermTFMap.put(docID, termTFBeanMap);
-                //System.out.println("DOC DOC : "+docID);
+
+            // Ignore documents with NO terms
+            if (docTermVector.toString().equals("{}")) {
                 continue;
             }
 
+            // Store term_vectors
             JsonNode terms = termVectorResponseJson.get("term_vectors").get("text").get("terms");
-            Iterator<Map.Entry<String, JsonNode>> nodeIterator =  terms.fields();
+            Iterator<Map.Entry<String, JsonNode>> nodeIterator = terms.fields();
 
             while (nodeIterator.hasNext()) {
 
                 Map.Entry<String, JsonNode> entry = nodeIterator.next();
-                termTFBeanMap.put(entry.getKey(), new TermTFBean(docLength, entry.getValue().get("term_freq").asInt()));
+                termTFBeanMap.put(entry.getKey(), new TermInfoBean(docLength, entry.getValue().get("term_freq").asInt(), entry.getValue().get("ttf").asInt()));
             }
 
             docTermTFMap.put(docID, termTFBeanMap);
@@ -153,10 +117,9 @@ public class JMSmoothing {
         // Read and store StopList terms
         Set<String> stopWords = getStopWords();
 
-        File queryFile = new File(QUERY_FILE);
-        BufferedReader br = new BufferedReader(new FileReader(queryFile));
-        String query = null;
-        while ((query = br.readLine()) != null) {
+        // For each query
+        String query;
+        while ((query = reader.readLine()) != null) {
 
             HashMap<String, Double> JMSmoothingMap = new HashMap<String, Double>();
             HashMap<String, Double> SortedMap;
@@ -166,7 +129,7 @@ public class JMSmoothing {
                 break;
             }
 
-            String queryNo = query.substring(0, 3).replace(".", "").trim();
+            String queryNo = query.substring(0, 5).replace(".", "").trim();
             System.out.println("QUERY NO : " + queryNo);
 
             query = query.substring(5).trim();
@@ -174,23 +137,9 @@ public class JMSmoothing {
             StringBuffer cleanQuery = removeStopWordsFromQuery(query, stopWords);
             String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
 
-            for(String word : cleanQueryWords) {
+            for (String word : cleanQueryWords) {
 
-
-                //Get max_score
-                JsonObject maxScoreObject = Json.createObjectBuilder()
-                        .add("size", 1)
-                        .add("_source", true)
-                        .add("query", Json.createObjectBuilder()
-                                .add("match", Json.createObjectBuilder()
-                                        .add("text", word)))
-                        .build();
-                HttpEntity maxScoreEntity = new NStringEntity(maxScoreObject.toString(), ContentType.APPLICATION_JSON);
-                Response maxScoreResponse = restClient.performRequest("GET", "/ap89_dataset/_search/", Collections.<String, String>emptyMap(), maxScoreEntity);
-                ObjectNode maxScoreNode = parseStringToJson(EntityUtils.toString(maxScoreResponse.getEntity()));
-
-
-                long maxScore = maxScoreNode.get("hits").get("max_score").asLong();
+                word = word.trim();
 
                 // Get stem for current word
                 JsonObject stemObj = Json.createObjectBuilder()
@@ -204,45 +153,30 @@ public class JMSmoothing {
                 ObjectNode stemResponse = parseStringToJson(EntityUtils.toString(response.getEntity()));
                 String stem = "";
 
+
                 for (JsonNode tokenObj : stemResponse.get("tokens")) {
                     stem = tokenObj.get("token").asText();
                 }
 
-                String term = (stem.equals("")) ? word : stem;
+                if (stem.equals("")) continue; //Word is not important
 
-                for(String key: docTermTFMap.keySet()){
+                for (String key : docTermTFMap.keySet()) {
 
-                    //Get Doc Length
-
-                    double LMTemp;
-                    Map<String, TermTFBean> termTFMap = docTermTFMap.get(key);
-                    if(termTFMap.size() <= 0) {
-
-                        double term1 = ( 0 + (0.4 * (maxScore) / (sum_doc_freq)));
-                        double JM =  (Math.log(term1));
-
-                        JMSmoothingMap.put(key,
-                                (JMSmoothingMap.get(key) == null ? JM : JMSmoothingMap.get(key) + JM));
-                        continue;
-                    }
+                    Map<String, TermInfoBean> termTFMap = docTermTFMap.get(key);
 
                     Double docLength = (double) termTFMap.entrySet().iterator().next().getValue().getDocLength();
-                    Double TFWD;
-                    if(termTFMap.containsKey(term)){
+                    Double TFWD = (double) 0;
+                    Double TTF = 0.0001;
 
-                        TFWD = (double) termTFMap.get(term).getTf()+1;
-
-                    }else{
-                        TFWD = (double) 0;
-
+                    if (termTFMap.containsKey(stem)) {
+                        TFWD = (double) termTFMap.get(stem).getTf();
+                        TTF = (double) termTFMap.get(stem).getTtf();
                     }
 
-                    double term1 = ((0.6 * TFWD / docLength) + (0.4 * (maxScore - TFWD) / (sum_doc_freq - docLength)));
-                    double JM =  (Math.log(term1));
+                    double term1 = ((0.9 * TFWD / docLength) + (0.1 * TTF / vocabulary));
+                    double JM = (Math.log(term1));
 
-                    JMSmoothingMap.put(key,
-                            (JMSmoothingMap.get(key) == null ? JM : JMSmoothingMap.get(key) + JM));
-
+                    JMSmoothingMap.put(key, (JMSmoothingMap.get(key) == null ? JM : JMSmoothingMap.get(key) + JM));
                 }
             }
 
@@ -263,7 +197,8 @@ public class JMSmoothing {
             JMSmoothingMap.clear();
         }
         writer.close();
-        br.close();
+        reader.close();
+        restClient.close();
 
         System.out.println("DONE");
 

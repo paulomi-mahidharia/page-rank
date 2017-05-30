@@ -1,44 +1,23 @@
 package edu.neu.ir;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import edu.neu.utility.TermData;
-import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.lucene.search.function.CombineFunction;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.functionscore.ScriptScoreFunctionBuilder;
-import org.elasticsearch.script.Script;
-import org.elasticsearch.script.ScriptContext;
-import org.elasticsearch.script.ScriptService;
-import org.elasticsearch.script.ScriptType;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.*;
-import java.net.InetAddress;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,14 +34,17 @@ public class OkapiBM25 {
     private final static String HOST = "localhost";
     private final static int PORT = 9200;
     private final static String SCHEME = "http";
-    private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
-    private static long DOCCount = 0;
+
+    private final static float b = (float) 0.75;
+    private final static float k1 = (float) 1.2;
+    private final static float k2 = (float) 100;
+    private final static double docAverage = (double) 20976545 / 84612;
+
     private final static String OUTPUT = "OkapiBM25.txt";
-    private static  HashMap<String, Float> okapiBM25Map = null;
-    private final static  double docAverage = (double) 20976545/84612;
-    private final static  float b = (float) 0.75;
-    private final static  float k1 = (float) 1.2;
-    private final static  float k2 = (float) 100;
+    private final static String QUERY_FILE = "/Users/paulomimahidharia/Desktop/IR/resources/AP_DATA/query_desc.51-100.short.txt";
+
+    private static long DOCCount = 0;
+    private static HashMap<String, Float> okapiBM25Map = null;
 
     public static void main(String args[]) throws IOException, ParseException {
 
@@ -82,9 +64,9 @@ public class OkapiBM25 {
         // Read and store StopList terms
         Set<String> stopWords = getStopWords();
 
-        BufferedReader br = new BufferedReader(new FileReader(queryFile));
+        BufferedReader reader = new BufferedReader(new FileReader(queryFile));
         String query;
-        while ((query = br.readLine()) != null) {
+        while ((query = reader.readLine()) != null) {
 
             //for each query
             if (query.length() <= 3) {
@@ -103,9 +85,11 @@ public class OkapiBM25 {
             String[] cleanQueryWords = cleanQuery.toString().trim().split(" ");
             for (String word : cleanQueryWords) {
 
+                word = word.trim();
+
                 int TFWQ = 0;
                 Pattern p = Pattern.compile(word);
-                Matcher m = p.matcher( cleanQuery );
+                Matcher m = p.matcher(cleanQuery);
                 while (m.find()) {
                     TFWQ++;
                 }
@@ -123,7 +107,7 @@ public class OkapiBM25 {
                 String stem = "";
 
                 for (JsonNode tokenObj : stemResponse.get("tokens")) {
-                    stem = tokenObj.get("token").asText().replace("\"", "").replace("\'", "\\'");
+                    stem = tokenObj.get("token").asText().replace("\"", "").replace("\'", "\\'").trim();
                 }
 
                 System.out.println(stem);
@@ -165,7 +149,7 @@ public class OkapiBM25 {
                 if (totalHits > 10000) {
 
                     scrollId = TFJSON.get("_scroll_id").asText();
-                    while(totalHits > 10000) {
+                    while (totalHits > 10000) {
 
                         JsonObject okaiBM25ScrollObject = Json.createObjectBuilder()
                                 .add("scroll", "1m")
@@ -204,10 +188,10 @@ public class OkapiBM25 {
         }
         writer.close();
         restClient.close();
-        br.close();
+        reader.close();
     }
 
-    private static void updateMap(JsonNode hit, long numberOfHits, int TFWQ){
+    private static void updateMap(JsonNode hit, long numberOfHits, int TFWQ) {
 
         String TFWDRaw = hit.get("fields").get("index_tf").toString().replace("[", "").replace("]", "").trim();
         int TFWD = TFWDRaw.equals("") ? 0 : Integer.parseInt(TFWDRaw);
@@ -217,7 +201,7 @@ public class OkapiBM25 {
 
         String docNo = hit.get("_source").get("docNo").asText();
 
-        Float OkapiBM25 = (float) (Math.log((DOCCount+0.5)/(numberOfHits + 0.5))*((TFWD+(k1*TFWD))/(TFWD+k1*((1-b)+b*(docLegth / docAverage)))) * ((TFWQ + (k2 * TFWQ)) / (TFWQ + k2)));
+        Float OkapiBM25 = (float) (Math.log((DOCCount + 0.5) / (numberOfHits + 0.5)) * ((TFWD + (k1 * TFWD)) / (TFWD + k1 * ((1 - b) + b * (docLegth / docAverage)))) * ((TFWQ + (k2 * TFWQ)) / (TFWQ + k2)));
         okapiBM25Map.put(docNo,
                 okapiBM25Map.get(docNo) == null ? OkapiBM25 : okapiBM25Map.get(docNo) + OkapiBM25);
     }
