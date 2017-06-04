@@ -8,28 +8,25 @@ public class TermInfoBean {
     private int docLength;
     private int tf;
     private int ttf;
+    private int df;
 
-    private double maxScore;
-
-    public TermInfoBean(int term, int tf) {
-        this.docLength = term;
+    public TermInfoBean(int docLength, int tf) {
+        this.docLength = docLength;
         this.tf = tf;
     }
 
-    public TermInfoBean(int term, int tf, int ttf) {
-        this.docLength = term;
-        this.tf = tf;
-        this.ttf = ttf;
-    }
-
-    public TermInfoBean(int term, int tf, int ttf, double maxScore) {
-        this.docLength = term;
+    public TermInfoBean(int docLength, int tf, int ttf) {
+        this.docLength = docLength;
         this.tf = tf;
         this.ttf = ttf;
-        this.maxScore = maxScore;
-
     }
 
+    public TermInfoBean(int docLength, int tf, int ttf, int df) {
+        this.docLength = docLength;
+        this.tf = tf;
+        this.ttf = ttf;
+        this.df = df;
+    }
 
     public int getDocLength() {
 
@@ -48,19 +45,19 @@ public class TermInfoBean {
         this.tf = tf;
     }
 
-    public double getMaxScore() {
-        return maxScore;
-    }
-
-    public void setMaxScore(double maxScore) {
-        this.maxScore = maxScore;
-    }
-
     public int getTtf() {
         return ttf;
     }
 
     public void setTtf(int ttf) {
         this.ttf = ttf;
+    }
+
+    public int getDf() {
+        return df;
+    }
+
+    public void setDf(int df) {
+        this.df = df;
     }
 }

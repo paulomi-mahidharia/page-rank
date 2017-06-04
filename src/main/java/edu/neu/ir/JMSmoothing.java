@@ -147,18 +147,46 @@ public class JMSmoothing {
                         .add("text", word)
                         .build();
 
+                System.out.println("WORD : "+word);
+
                 HttpEntity stemEntity = new NStringEntity(stemObj.toString(), ContentType.APPLICATION_JSON);
                 Response response = restClient.performRequest("GET", "ap89_dataset/_analyze", Collections.<String, String>emptyMap(), stemEntity);
 
                 ObjectNode stemResponse = parseStringToJson(EntityUtils.toString(response.getEntity()));
-                String stem = "";
+                String stemRaw = "";
 
 
                 for (JsonNode tokenObj : stemResponse.get("tokens")) {
-                    stem = tokenObj.get("token").asText();
+                    stemRaw = tokenObj.get("token").asText().replace("\"", "").replace("\'", "\\'").trim();
                 }
 
-                if (stem.equals("")) continue; //Word is not important
+                String stem = (stemRaw.equals("")) ? word : stemRaw;
+
+                //Get TTF for the term
+                JsonObject ttfObj = Json.createObjectBuilder()
+                        .add("size", 1)
+                        .add("script_fields", Json.createObjectBuilder()
+                                .add("index_ttf", Json.createObjectBuilder()
+                                        .add("script", Json.createObjectBuilder()
+                                                .add("lang", "groovy")
+                                                .add("inline", "_index['text']['"+stem+"'].ttf()"))))
+                        .build();
+
+                HttpEntity ttfEntity = new NStringEntity(ttfObj.toString(), ContentType.APPLICATION_JSON);
+                Response ttResponse = restClient.performRequest("GET", "ap89_dataset/_search", Collections.<String, String>emptyMap(), ttfEntity);
+
+                ObjectNode ttfNode = parseStringToJson(EntityUtils.toString(ttResponse.getEntity()));
+
+                Double TTF = 0.00001;
+
+                JsonNode hits = ttfNode.get("hits").get("hits");
+                for(JsonNode hit: hits){
+                    TTF = Double.parseDouble(hit.get("fields").get("index_ttf").toString().replace("[", "").replace("]", "").trim());
+                }
+
+                if(TTF == 0.0) TTF = 0.00001;
+
+                Double backgroudScore = (0.5 * TTF / vocabulary);
 
                 for (String key : docTermTFMap.keySet()) {
 
@@ -166,16 +194,18 @@ public class JMSmoothing {
 
                     Double docLength = (double) termTFMap.entrySet().iterator().next().getValue().getDocLength();
                     Double TFWD = (double) 0;
-                    Double TTF = 0.0001;
 
                     if (termTFMap.containsKey(stem)) {
                         TFWD = (double) termTFMap.get(stem).getTf();
-                        TTF = (double) termTFMap.get(stem).getTtf();
+                        //TTF = (double) termTFMap.get(stem).getTtf();
                     }
 
-                    double term1 = ((0.9 * TFWD / docLength) + (0.1 * TTF / vocabulary));
-                    double JM = (Math.log(term1));
+                    //System.out.println(" TTF : "+TTF);
+                    double term1 = ((0.5 * TFWD / docLength) + backgroudScore);
 
+                    System.out.println("term1 : " + term1);
+                    double JM = (Math.log(term1));
+                    System.out.println("JM : "+JM);
                     JMSmoothingMap.put(key, (JMSmoothingMap.get(key) == null ? JM : JMSmoothingMap.get(key) + JM));
                 }
             }
@@ -196,6 +226,7 @@ public class JMSmoothing {
             SortedMap.clear();
             JMSmoothingMap.clear();
         }
+
         writer.close();
         reader.close();
         restClient.close();
