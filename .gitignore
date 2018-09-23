@@ -1,5 +1,11 @@
+# Created by .ignore support plugin (hsz.mobi)
 .idea
-oldresults
 target
-results
-*.txt
+A4_RootSet.txt
+allURLs.txt
+BasicSetFromOkapi.txt
+OutCnt.txt
+OutCntWT2G.txt
+PageRankWT2G.txt
+RootSet.txt
+MergedGraph
